@@ -5,6 +5,7 @@ import cv2
 from imutils import resize
 
 from globals import SHOW_STEPS, WAIT_TIME
+from character_recognition import get_characters
 from edges import extract_edges
 from skeleton import get_skeletons
 
@@ -44,12 +45,15 @@ def main():
     th = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 35, 11)
 
+    # This needs to happen before the image has its colours inverted to improve the recognition
+    characters = get_characters(th)
+
     # Invert to highlight the shape
     th = cv2.bitwise_not(th)
-    kernel = np.array([[0, 1, 1],
-                       [0, 1, 0],
-                       [1, 1, 0]], dtype='uint8')
-    th = cv2.morphologyEx(th, cv2.MORPH_CLOSE, kernel)
+    # kernel = np.array([[0, 1, 1],
+    #                    [0, 1, 0],
+    #                    [1, 1, 0]], dtype='uint8')
+    # th = cv2.morphologyEx(th, cv2.MORPH_CLOSE, kernel)
     if SHOW_STEPS:
         process_image = np.hstack((process_image, th))
         cv2.imshow('process', process_image)
