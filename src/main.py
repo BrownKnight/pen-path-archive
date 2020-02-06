@@ -8,8 +8,18 @@ from globals import SHOW_STEPS, WAIT_TIME
 from edges import extract_edges
 from skeleton import get_skeletons
 
-
 def main():
+    """The main function of the program, runs the entire pipeline
+
+    The pipeline consists of the following steps
+    - Process image (resize, blur etc)
+    - Skeletonize image to create single-width edges
+    - Extract edge paths for each non-intersecting edge of each letter
+    - TODO Something probably needs to happen here (i.e. more key point extraction)
+    - Output all the data
+    - Inject the data into a DNN
+    -
+    """
     if len(sys.argv) < 2:
         exit("Not enough arguments given")
 
@@ -58,7 +68,7 @@ def main():
     for index in range(len(letter_skeletons)):
         letter.append(extract_edges(endpoints[index], jointpoints[index], letter_skeletons[index], edges_image))
 
-    edges_image[-5, -5] = 255
+    edges_image[-25:, -25:] = 255
     cv2.imshow('letters', edges_image)
     print("Found edges for %s letters" % len(letter))
 
