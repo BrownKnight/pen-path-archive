@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import cv2
 from imutils import resize
+from pathlib import Path
 
 from globals import SHOW_STEPS, WAIT_TIME
 from character_recognition import get_characters
@@ -25,9 +26,9 @@ def main():
     if len(sys.argv) < 2:
         exit("Not enough arguments given")
 
-    path = sys.argv[1]
+    path = Path("test/images") / sys.argv[1]
     print("Reading image from %s" % path)
-    img = cv2.imread(path, 0)
+    img = cv2.imread(str(path), 0)
 
     # Some smoothing to get rid of the noise
     # img = cv2.bilateralFilter(img, 5, 35, 10)
@@ -51,10 +52,10 @@ def main():
     for char in characters:
         # Invert to highlight the shape
         char.image = cv2.bitwise_not(char.image)
-        kernel = np.array([[0, 1, 1],
-                           [0, 1, 0],
-                           [1, 1, 0]], dtype='uint8')
-        char.image = cv2.morphologyEx(char.image, cv2.MORPH_CLOSE, kernel)
+        # kernel = np.array([[0, 1, 1],
+        #                    [0, 1, 0],
+        #                    [1, 1, 0]], dtype='uint8')
+        # char.image = cv2.morphologyEx(char.image, cv2.MORPH_CLOSE, kernel)
         letter_process_image = char.image
         if SHOW_STEPS:
             cv2.imshow("letter %s " % char.letter, letter_process_image)
@@ -77,8 +78,11 @@ def main():
         extract_edges(char, edges_image)
 
     cv2.waitKey(0)
-    cv2.waitKey(0)
     cv2.destroyAllWindows()
+    cv2.waitKey(1)
+
+    # TODO Write out each character to output folders, for use in the neural network
+
     exit()
 
 
