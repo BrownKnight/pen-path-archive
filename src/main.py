@@ -77,7 +77,7 @@ def main():
         # For each letter, find the edges
         # for each letter etc
         edges_image = np.zeros_like(char.image)
-        extract_edges(char, edges_image)
+        char.edges = extract_edges(char, edges_image)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

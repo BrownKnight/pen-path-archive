@@ -49,10 +49,10 @@ def get_characters(img):
         char = Character()
         char.letter = boxes['char'][index]
 
-        left = int(boxes['left'][index])
-        top = h - int(boxes['top'][index])
-        right = int(boxes['right'][index])
-        bottom = h - int(boxes['bottom'][index])
+        left = int(boxes['left'][index]) - 1
+        top = h - int(boxes['top'][index]) - 1
+        right = int(boxes['right'][index]) + 1
+        bottom = h - int(boxes['bottom'][index]) + 1
 
         char.image = img[top:bottom, left:right]
         # Make siure the array is copied to ensure changes to it for display

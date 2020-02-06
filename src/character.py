@@ -21,7 +21,7 @@ class Character:
 
     @property
     def average_edge_length(self):
-        return sum([len(i) for i in self.edges] or [0]) / (len(self.edges) or 1) or 0
+        return int(sum([len(i) for i in self.edges] or [0]) / (len(self.edges) or 1)) or 0
 
     @property
     def max_edge_length(self):
