@@ -48,34 +48,33 @@ def main():
     # This needs to happen before the image has its colours inverted to improve the recognition
     characters = get_characters(th)
 
-    # Invert to highlight the shape
-    th = cv2.bitwise_not(th)
-    # kernel = np.array([[0, 1, 1],
-    #                    [0, 1, 0],
-    #                    [1, 1, 0]], dtype='uint8')
-    # th = cv2.morphologyEx(th, cv2.MORPH_CLOSE, kernel)
-    if SHOW_STEPS:
-        process_image = np.hstack((process_image, th))
-        cv2.imshow('process', process_image)
+    for char in characters:
+        # Invert to highlight the shape
+        char.image = cv2.bitwise_not(char.image)
+        kernel = np.array([[0, 1, 1],
+                           [0, 1, 0],
+                           [1, 1, 0]], dtype='uint8')
+        char.image = cv2.morphologyEx(char.image, cv2.MORPH_CLOSE, kernel)
+        letter_process_image = char.image
+        if SHOW_STEPS:
+            cv2.imshow("letter %s " % char.letter, letter_process_image)
+            cv2.waitKey(int(WAIT_TIME/3))
 
-    # Process the image to get the endpoints and skeletons for each letter
-    endpoints, jointpoints, letter_skeletons, mask, th = get_skeletons(th)
+        # Process the image to get the endpoints and skeletons for each letter
+        success = get_skeletons(char)
+        if not success:
+            print("Skipping the character %s, could not get skeleton" % char.letter)
+            continue
 
-    if SHOW_STEPS:
-        process_image = np.hstack((process_image, th))
-        cv2.imshow('process', process_image)
-        cv2.waitKey(0)
+        if SHOW_STEPS:
+            letter_process_image = np.hstack((letter_process_image, char.image))
+            cv2.imshow("letter %s " % char.letter, letter_process_image)
+            cv2.waitKey(WAIT_TIME)
 
-    # For each letter, find the edges
-    # for each letter etc
-    letter = []
-    edges_image = np.zeros_like(mask)
-    for index in range(len(letter_skeletons)):
-        letter.append(extract_edges(endpoints[index], jointpoints[index], letter_skeletons[index], edges_image))
-
-    edges_image[-25:, -25:] = 255
-    cv2.imshow('letters', edges_image)
-    print("Found edges for %s letters" % len(letter))
+        # For each letter, find the edges
+        # for each letter etc
+        edges_image = np.zeros_like(char.image)
+        extract_edges(char, edges_image)
 
     cv2.waitKey(0)
     cv2.waitKey(0)
@@ -84,6 +83,7 @@ def main():
 
 
 def merge_short_edges(e):
+    """TODO: NOT USED AT THIS MOMENT, PROBBALY SHOULDN'T BE EITHER"""
     edges = e.copy()
     for i in range(len(edges)):
         for j in range(len(edges)):

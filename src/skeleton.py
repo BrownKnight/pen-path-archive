@@ -5,56 +5,51 @@ import numpy as np
 from imutils.contours import sort_contours
 from skimage.morphology import skeletonize
 
+from character import Character
 from globals import SHOW_STEPS, WAIT_TIME
 
 
-def get_skeletons(th):
+def get_skeletons(char: Character):
     # Skeletonize the shapes
     # Skimage function takes image with either True, False or 0,1
     # and returns and image with values 0, 1.
-    th = th == 255
-    th = skeletonize(th)
-    th = th.astype(np.uint8) * 255
+    char.image = char.image == 255
+    char.image = skeletonize(char.image)
+    char.image = char.image.astype(np.uint8) * 255
 
     # Find contours of the skeletons
-    contours, hierarchy = cv2.findContours(th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(char.image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # Sort the contours left-to-right
     contours, _ = sort_contours(contours, "left-to-right")
-    # List for endpoints
-    endpoints = []
-    # List of jointpoints
-    jointpoints = []
-    # List for (x, y) coordinates of the skeletons
-    letter_skeletons = []
     for contour in contours:
         if cv2.arcLength(contour, True) > 100:
             # Initialize mask
-            mask = np.zeros(th.shape, np.uint8)
+            mask = np.zeros(char.image.shape, np.uint8)
             # Bounding rect of the contour
             x, y, w, h = cv2.boundingRect(contour)
             mask[y:y + h, x:x + w] = 255
             # Get only the skeleton in the mask area
-            mask = cv2.bitwise_and(mask, th)
+            mask = cv2.bitwise_and(mask, char.image)
             # Take the coordinates of the skeleton points
             rows, cols = np.where(mask == 255)
             # Add the coordinates to the list
-            letter_skeletons.append(list(zip(cols, rows)))
+            char.skeleton = list(zip(cols, rows))
 
             # Find the endpoints for the shape and update a list
-            eps = skeleton_endpoints(mask)
-            endpoints.append(eps)
+            char.endpoints = skeleton_endpoints(mask)
 
             # Find the jointpoints for the shape and update a list
-            jps = skeleton_jointpoints(mask)
-            jointpoints.append(jps)
+            char.jointpoints = skeleton_jointpoints(mask)
 
             # Draw the endpoints
-            [cv2.circle(th, ep, 5, 255, 1) for ep in eps]
-            print("Endpoints %s" % eps)
-            [cv2.circle(th, jp, 4, 180, 1) for jp in jps]
-            print("Jointpoints %s" % jps)
+            [cv2.circle(char.image, ep, 5, 255, 1) for ep in char.endpoints]
+            print("Endpoints %s" % char.endpoints)
+            [cv2.circle(char.image, jp, 4, 180, 1) for jp in char.jointpoints]
+            print("Jointpoints %s" % char.jointpoints)
 
-    return endpoints, jointpoints, letter_skeletons, mask, th
+        else:
+            return False
+    return True
 
 
 def skeleton_jointpoints(skel):

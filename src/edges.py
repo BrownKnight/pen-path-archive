@@ -1,16 +1,18 @@
 import cv2
 from matplotlib import pyplot as plt
 
+from character import Character
 
-def extract_edges(endpoints, jointpoints, letter_skeleton, img):
+
+def extract_edges(char: Character, img):
     plot_formats = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c',
                     '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1',
                     '#000075', '#808080', '#ffffff', '#000000']
 
     # Try to find all of the edges of the letter, with each edge starting & ending at an endpoint
-    possible_points = letter_skeleton.copy()
+    possible_points = char.skeleton.copy()
     edges = []
-    joint_end_points = endpoints + jointpoints
+    joint_end_points = char.endpoints + char.jointpoints
 
     new_points_found = True
     size = 0
@@ -29,9 +31,6 @@ def extract_edges(endpoints, jointpoints, letter_skeleton, img):
                 edges.append(edge)
                 for point in edge:
                     img[point[1], point[0]] = 255
-
-    cv2.imshow('letters', img)
-    cv2.waitKey(0)
 
     print("Number of edges: %s" % len(edges))
     for index, edge in enumerate(edges):

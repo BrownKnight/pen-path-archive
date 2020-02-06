@@ -38,9 +38,11 @@ def test_main():
 
 def get_characters(img):
     boxes = pt.image_to_boxes(img, output_type=Output.DICT)
+    if boxes is None or boxes['char'] == ['']:
+        exit("No characters could be found")
     print(boxes)
 
-    # Draw the bounding box
+    # Extract each individual letter and Draw the bounding box on the image
     h, w = img.shape
     chars = []
     for index in range(len(boxes['char'])):
@@ -53,12 +55,12 @@ def get_characters(img):
         bottom = h - int(boxes['bottom'][index])
 
         char.image = img[top:bottom, left:right]
-
-        point1 = (left, top)
-        point2 = (right, bottom)
-        cv2.rectangle(img, point1, point2, 0, 2)
-
+        # Make siure the array is copied to ensure changes to it for display
+        # purposes dont affect the actual letter representation
+        char.image = char.image.copy()
         chars.append(char)
+
+        cv2.rectangle(img, (left, top), (right, bottom), 0, 2)
 
     if SHOW_STEPS:
         cv2.imshow('output', img)
@@ -67,4 +69,5 @@ def get_characters(img):
     return chars
 
 
-test_main()
+if __name__ == "__main__":
+    test_main()
