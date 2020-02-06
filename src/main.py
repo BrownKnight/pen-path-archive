@@ -10,6 +10,7 @@ from character_recognition import get_characters
 from edges import extract_edges
 from skeleton import get_skeletons
 
+
 def main():
     """The main function of the program, runs the entire pipeline
 
@@ -59,7 +60,7 @@ def main():
         letter_process_image = char.image
         if SHOW_STEPS:
             cv2.imshow("letter %s " % char.letter, letter_process_image)
-            cv2.waitKey(int(WAIT_TIME/3))
+            cv2.waitKey(int(WAIT_TIME / 3))
 
         # Process the image to get the endpoints and skeletons for each letter
         success = get_skeletons(char)
