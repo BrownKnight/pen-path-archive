@@ -13,6 +13,7 @@ def main():
 
     The pipeline consists of the following steps
     - Process image (resize, blur etc)
+    - Use pytesseract to extract the location of each character, and the character it is
     - Skeletonize image to create single-width edges
     - Extract edge paths for each non-intersecting edge of each letter
     - TODO Something probably needs to happen here (i.e. more key point extraction)
