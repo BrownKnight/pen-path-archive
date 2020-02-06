@@ -15,5 +15,19 @@ class Character:
     """Populate in the edge detection/pathing step"""
     edges = []
 
-    """Determines if this character has enough information to be used in the Neural Network"""
-    usable = endpoints is not [] and skeleton is not [] and edges is not []
+    @property
+    def min_edge_length(self):
+        return min([len(i) for i in self.edges] or [0]) or 0
+
+    @property
+    def average_edge_length(self):
+        return sum([len(i) for i in self.edges] or [0]) / (len(self.edges) or 1) or 0
+
+    @property
+    def max_edge_length(self):
+        return max([len(i) for i in self.edges] or [0]) or 0
+
+    @property
+    def usable(self):
+        """Determines if this character has enough information to be used in the Neural Network"""
+        return self.endpoints is not [] and self.skeleton is not [] and self.edges is not []

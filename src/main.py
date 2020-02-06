@@ -5,6 +5,7 @@ import cv2
 from imutils import resize
 from pathlib import Path
 
+from data import write_chars_to_file
 from globals import SHOW_STEPS, WAIT_TIME
 from character_recognition import get_characters
 from edges import extract_edges
@@ -83,6 +84,7 @@ def main():
     cv2.waitKey(1)
 
     # TODO Write out each character to output folders, for use in the neural network
+    write_chars_to_file(characters)
 
     exit()
 
