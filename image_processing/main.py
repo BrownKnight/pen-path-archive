@@ -49,11 +49,12 @@ def main():
                                cv2.THRESH_BINARY, 35, 11)
 
     # This needs to happen before the image has its colours inverted to improve the recognition
+    th = cv2.bitwise_not(th)
     characters = get_characters(th)
 
     for char in characters:
         # Invert to highlight the shape
-        char.image = cv2.bitwise_not(char.image)
+        # char.image = cv2.bitwise_not(char.image)
         # kernel = np.array([[0, 1, 1],
         #                    [0, 1, 0],
         #                    [1, 1, 0]], dtype='uint8')
@@ -64,6 +65,7 @@ def main():
             cv2.waitKey(int(WAIT_TIME / 3))
 
         # Process the image to get the endpoints and skeletons for each letter
+        print("Getting skeleton for character %s" % char.letter)
         success = get_skeletons(char)
         if not success:
             print("Skipping the character %s, could not get skeleton" % char.letter)
@@ -90,7 +92,7 @@ def main():
 
 
 def merge_short_edges(e):
-    """TODO: NOT USED AT THIS MOMENT, PROBBALY SHOULDN'T BE EITHER"""
+    """TODO: NOT USED AT THIS MOMENT, PROBABLY SHOULDN'T BE EITHER"""
     edges = e.copy()
     for i in range(len(edges)):
         for j in range(len(edges)):

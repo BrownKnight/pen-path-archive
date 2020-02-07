@@ -22,7 +22,7 @@ def get_skeletons(char: Character):
     # Sort the contours left-to-right
     contours, _ = sort_contours(contours, "left-to-right")
     for contour in contours:
-        if cv2.arcLength(contour, True) > 100:
+        if cv2.arcLength(contour, True) > 50:
             # Initialize mask
             mask = np.zeros(char.image.shape, np.uint8)
             # Bounding rect of the contour

@@ -4,9 +4,12 @@ import csv
 import cv2
 from imutils import resize
 import numpy as np
+from imutils.contours import sort_contours
 
 from pytesseract import pytesseract as pt, Output
 import sys
+
+from skimage.morphology import skeletonize
 
 from character import Character
 from globals import SHOW_STEPS, WAIT_TIME
@@ -37,36 +40,72 @@ def test_main():
 
 
 def get_characters(img):
-    boxes = pt.image_to_boxes(img, output_type=Output.DICT)
-    if boxes is None or boxes['char'] == ['']:
-        exit("No characters could be found")
-    print(boxes)
-
-    # Extract each individual letter and Draw the bounding box on the image
-    h, w = img.shape
     chars = []
-    for index in range(len(boxes['char'])):
-        char = Character()
-        char.letter = boxes['char'][index]
 
-        left = int(boxes['left'][index]) - 1
-        top = h - int(boxes['top'][index]) - 1
-        right = int(boxes['right'][index]) + 1
-        bottom = h - int(boxes['bottom'][index]) + 1
+    # Skeletonize the shapes
+    # Skimage function takes image with either True, False or 0,1
+    # and returns and image with values 0, 1.
+    img = img == 255
+    img = skeletonize(img)
+    img = img.astype(np.uint8) * 255
 
-        char.image = img[top:bottom, left:right]
-        # Make siure the array is copied to ensure changes to it for display
-        # purposes dont affect the actual letter representation
-        char.image = char.image.copy()
-        chars.append(char)
-
-        cv2.rectangle(img, (left, top), (right, bottom), 0, 2)
-
-    if SHOW_STEPS:
-        cv2.imshow('output', img)
-        cv2.waitKey(WAIT_TIME)
+    # Find contours of the skeletons
+    contours, hierarchy = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # Sort the contours left-to-right
+    contours, _ = sort_contours(contours, "left-to-right")
+    for index, contour in enumerate(contours):
+        if cv2.arcLength(contour, True) > 50:
+            # Initialize mask
+            mask = np.zeros(img.shape, np.uint8)
+            # Bounding rect of the contour
+            x, y, w, h = cv2.boundingRect(contour)
+            mask[y:y + h, x:x + w] = 255
+            # Get only the skeleton in the mask area
+            mask = cv2.bitwise_and(mask, img)
+            char = Character()
+            char.image = mask[y:y + h, x:x + w]
+            char.image = cv2.copyMakeBorder(char.image, 2, 2, 2, 2, cv2.BORDER_CONSTANT, None, 0)
+            char.letter = str(index)
+            chars.append(char)
 
     return chars
+
+
+# def get_characters(img):
+#     boxes = pt.image_to_boxes(img, output_type=Output.DICT)
+#     if boxes is None or boxes['char'] == ['']:
+#         exit("No characters could be found")
+#     print(boxes)
+#
+#     display_bounding_box_image = img.copy()
+#
+#     # Extract each individual letter and Draw the bounding box on the image
+#     h, w = img.shape
+#     chars = []
+#     for index in range(len(boxes['char'])):
+#         char = Character()
+#         char.letter = boxes['char'][index]
+#
+#         left = int(boxes['left'][index]) - 1
+#         top = h - int(boxes['top'][index]) - 1
+#         right = int(boxes['right'][index]) + 1
+#         bottom = h - int(boxes['bottom'][index]) + 1
+#
+#         char.image = img[top:bottom, left:right]
+#         # Add a plain border around the image to improve skeleton recognition
+#         char.image = cv2.copyMakeBorder(char.image, 2, 2, 2, 2, cv2.BORDER_CONSTANT, None, 255)
+#         # Make sure the array is copied to ensure changes to it for display
+#         # purposes dont affect the actual letter representation
+#         char.image = char.image.copy()
+#         chars.append(char)
+#
+#         cv2.rectangle(display_bounding_box_image, (left, top), (right, bottom), 0, 2)
+#
+#     if SHOW_STEPS:
+#         cv2.imshow('output', display_bounding_box_image)
+#         cv2.waitKey(WAIT_TIME)
+#
+#     return chars
 
 
 if __name__ == "__main__":
