@@ -5,9 +5,9 @@ import cv2
 from imutils import resize
 from pathlib import Path
 
-from data import write_chars_to_file
+from data_handler import write_chars_to_file
 from globals import SHOW_STEPS, WAIT_TIME
-from character_recognition import get_characters
+from character_bounding_boxes import get_char_bounding_boxes
 from edges import extract_edges
 from skeleton import get_skeletons
 
@@ -49,10 +49,11 @@ def main():
                                cv2.THRESH_BINARY, 35, 11)
 
     # This needs to happen before the image has its colours inverted to improve the recognition
-    th = cv2.bitwise_not(th)
-    characters = get_characters(th)
+    characters = get_char_bounding_boxes(th)
 
     for char in characters:
+        # char.letter = get_character_letter(char.image)
+
         # Invert to highlight the shape
         # char.image = cv2.bitwise_not(char.image)
         # kernel = np.array([[0, 1, 1],
@@ -70,11 +71,6 @@ def main():
         if not success:
             print("Skipping the character %s, could not get skeleton" % char.letter)
             continue
-
-        if SHOW_STEPS:
-            letter_process_image = np.hstack((letter_process_image, char.image))
-            cv2.imshow("letter %s " % char.letter, letter_process_image)
-            cv2.waitKey(WAIT_TIME)
 
         # For each letter, find the edges
         # for each letter etc

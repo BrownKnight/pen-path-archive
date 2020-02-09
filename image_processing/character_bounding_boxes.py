@@ -62,8 +62,8 @@ def get_char_bounding_boxes(img):
             x, y, w, h = cv2.boundingRect(contour)
             char = Character()
             char.image = img[y - 1:y + h + 1, x - 1:x + w + 1]
-            char.image = cv2.copyMakeBorder(char.image, 8, 8, 8, 8, cv2.BORDER_CONSTANT, None, 255)
-            char.image = cv2.resize(char.image, (64, 64))
+            char.image = cv2.copyMakeBorder(char.image, 4, 4, 4, 4, cv2.BORDER_CONSTANT, None, 255)
+            char.image = cv2.resize(char.image, (48, 48))
             char.letter = str(index)
             chars.append(char)
 

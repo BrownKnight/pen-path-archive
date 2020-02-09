@@ -13,6 +13,11 @@ def get_skeletons(char: Character):
     # Skeletonize the shapes
     # Skimage function takes image with either True, False or 0,1
     # and returns and image with values 0, 1.
+
+    # Save a copy of the image here to use in the SHOW_STEPS comparison
+    comparison_img = char.image.copy()
+
+    char.image = cv2.bitwise_not(char.image)
     char.image = char.image == 255
     char.image = skeletonize(char.image)
     char.image = char.image.astype(np.uint8) * 255
@@ -22,7 +27,7 @@ def get_skeletons(char: Character):
     # Sort the contours left-to-right
     contours, _ = sort_contours(contours, "left-to-right")
     for contour in contours:
-        if cv2.arcLength(contour, True) > 50:
+        if cv2.arcLength(contour, True) > 40:
             # Initialize mask
             mask = np.zeros(char.image.shape, np.uint8)
             # Bounding rect of the contour
@@ -41,11 +46,19 @@ def get_skeletons(char: Character):
             # Find the jointpoints for the shape and update a list
             char.jointpoints = skeleton_jointpoints(mask)
 
+            # Remove any jointpoints that are next to endpoints
+            remove_close_points(char.jointpoints, char.endpoints)
+
             # Draw the endpoints
-            [cv2.circle(char.image, ep, 5, 255, 1) for ep in char.endpoints]
+            [cv2.circle(mask, ep, 3, 180, 1) for ep in char.endpoints]
             print("Endpoints %s" % char.endpoints)
-            [cv2.circle(char.image, jp, 4, 180, 1) for jp in char.jointpoints]
+            [cv2.circle(mask, jp, 3, 120, 1) for jp in char.jointpoints]
             print("Jointpoints %s" % char.jointpoints)
+
+            if SHOW_STEPS:
+                letter_process_image = np.hstack((comparison_img, mask))
+                cv2.imshow("letter %s " % char.letter, letter_process_image)
+                cv2.waitKey(WAIT_TIME)
 
         else:
             return False
@@ -71,19 +84,23 @@ def skeleton_jointpoints(skel):
     coords = list(zip(cols, rows))
 
     # Remove all jointpoints that are next to each other (i.e. distance < sqrt(2) which we say is ~ 1.5
-    for point1 in coords:
-        for point2 in coords:
-            if point2 not in coords or point1 == point2:
+    remove_close_points(coords, coords)
+
+    return coords
+
+
+def remove_close_points(coords_to_filter, coords_for_comparison):
+    for point1 in coords_to_filter:
+        for point2 in coords_for_comparison:
+            if point1 not in coords_to_filter or point1 == point2:
                 continue
             x1, y1 = point1
             x2, y2 = point2
             # Pythagoras to figure out distance
             distance = sqrt((abs(x1 - x2)) ** 2 + (abs(y1 - y2)) ** 2)
             if distance < 1.5:
-                print("Joint Points %s and %s are very close (%s), removing %s" % (point1, point2, distance, point2))
-                coords.remove(point2)
-
-    return coords
+                print("Joint/End Points %s and %s are very close (%s), removing %s" % (point1, point2, distance, point1))
+                coords_to_filter.remove(point1)
 
 
 def skeleton_endpoints(skel):

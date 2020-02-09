@@ -30,4 +30,4 @@ class Character:
     @property
     def usable(self):
         """Determines if this character has enough information to be used in the Neural Network"""
-        return self.endpoints is not [] and self.skeleton is not [] and self.edges is not []
+        return len(self.endpoints) > 0 and self.skeleton is not [] and len(self.edges) > 0

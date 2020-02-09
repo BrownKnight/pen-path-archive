@@ -26,7 +26,7 @@ def extract_edges(char: Character, img):
             cv2.circle(img, path_start_point, size, 255, 1)
             [cv2.circle(img, point, 3, 150, 1) for point in joint_end_points]
             edge = find_edge_path(path_start_point, joint_end_points.copy(), possible_points)
-            if edge is not None:
+            if edge is not None and len(edge) > 2:
                 new_points_found = True
                 edges.append(edge)
                 for point in edge:
