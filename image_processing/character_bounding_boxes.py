@@ -36,35 +36,34 @@ def test_main():
     #                    [1, 1, 0]], dtype='uint8')
     # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
 
-    get_characters(img)
+    get_char_bounding_boxes(img)
 
 
-def get_characters(img):
+def get_char_bounding_boxes(img):
+    """TODO If we use the skeletonize approach for this function, it should be merged with skeleton.py"""
     chars = []
 
     # Skeletonize the shapes
     # Skimage function takes image with either True, False or 0,1
     # and returns and image with values 0, 1.
-    img = img == 255
-    img = skeletonize(img)
-    img = img.astype(np.uint8) * 255
+
+    skeleton_img = cv2.bitwise_not(img)
+    skeleton_img = skeleton_img == 255
+    skeleton_img = skeletonize(skeleton_img)
+    skeleton_img = skeleton_img.astype(np.uint8) * 255
 
     # Find contours of the skeletons
-    contours, hierarchy = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(skeleton_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # Sort the contours left-to-right
     contours, _ = sort_contours(contours, "left-to-right")
     for index, contour in enumerate(contours):
-        if cv2.arcLength(contour, True) > 50:
-            # Initialize mask
-            mask = np.zeros(img.shape, np.uint8)
+        if cv2.arcLength(contour, True) > 40:
             # Bounding rect of the contour
             x, y, w, h = cv2.boundingRect(contour)
-            mask[y:y + h, x:x + w] = 255
-            # Get only the skeleton in the mask area
-            mask = cv2.bitwise_and(mask, img)
             char = Character()
-            char.image = mask[y:y + h, x:x + w]
-            char.image = cv2.copyMakeBorder(char.image, 2, 2, 2, 2, cv2.BORDER_CONSTANT, None, 0)
+            char.image = img[y - 1:y + h + 1, x - 1:x + w + 1]
+            char.image = cv2.copyMakeBorder(char.image, 8, 8, 8, 8, cv2.BORDER_CONSTANT, None, 255)
+            char.image = cv2.resize(char.image, (64, 64))
             char.letter = str(index)
             chars.append(char)
 
