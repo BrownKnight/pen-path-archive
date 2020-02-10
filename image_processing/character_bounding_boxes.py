@@ -63,7 +63,7 @@ def get_char_bounding_boxes(img):
             char = Character()
             char.image = img[y - 1:y + h + 1, x - 1:x + w + 1]
             char.image = cv2.copyMakeBorder(char.image, 4, 4, 4, 4, cv2.BORDER_CONSTANT, None, 255)
-            char.image = cv2.resize(char.image, (48, 48))
+            char.image = cv2.resize(char.image, (64, 64))
             char.letter = str(index)
             chars.append(char)
 
@@ -73,7 +73,7 @@ def get_char_bounding_boxes(img):
 # def get_characters(img):
 #     boxes = pt.image_to_boxes(img, output_type=Output.DICT)
 #     if boxes is None or boxes['char'] == ['']:
-#         exit("No characters could be found")
+#         exit("No image_input could be found")
 #     print(boxes)
 #
 #     display_bounding_box_image = img.copy()
@@ -101,7 +101,7 @@ def get_char_bounding_boxes(img):
 #         cv2.rectangle(display_bounding_box_image, (left, top), (right, bottom), 0, 2)
 #
 #     if SHOW_STEPS:
-#         cv2.imshow('output', display_bounding_box_image)
+#         cv2.imshow('image_output', display_bounding_box_image)
 #         cv2.waitKey(WAIT_TIME)
 #
 #     return chars

@@ -5,14 +5,15 @@ import cv2
 from imutils import resize
 from pathlib import Path
 
+from character import Character
 from data_handler import write_chars_to_file
-from globals import SHOW_STEPS, WAIT_TIME
+from globals import SHOW_STEPS, WAIT_TIME, SINGLE_CHARACTER_IMAGES
 from character_bounding_boxes import get_char_bounding_boxes
 from edges import extract_edges
 from skeleton import get_skeletons
 
 
-def main():
+def main(input_path, output_path):
     """The main function of the program, runs the entire pipeline
 
     The pipeline consists of the following steps
@@ -25,19 +26,17 @@ def main():
     - Inject the data into a DNN
     -
     """
-    if len(sys.argv) < 2:
-        exit("Not enough arguments given")
-
-    path = Path("test/images") / sys.argv[1]
-    print("Reading image from %s" % path)
-    img = cv2.imread(str(path), 0)
+    img = cv2.imread(input_path, 0)
 
     # Some smoothing to get rid of the noise
     # img = cv2.bilateralFilter(img, 5, 35, 10)
     img = cv2.GaussianBlur(img, (3, 3), 3)
     # img = cv2.blur(img, (3, 3))
 
-    img = resize(img, width=700)
+    if SINGLE_CHARACTER_IMAGES:
+        img = resize(img, width=64)
+    else:
+        img = resize(img, width=700)
 
     process_image = img
     if SHOW_STEPS:
@@ -49,7 +48,13 @@ def main():
                                cv2.THRESH_BINARY, 35, 11)
 
     # This needs to happen before the image has its colours inverted to improve the recognition
-    characters = get_char_bounding_boxes(th)
+    if SINGLE_CHARACTER_IMAGES:
+        character = Character()
+        character.image = th
+        character.letter = "0"
+        characters = [character]
+    else:
+        characters = get_char_bounding_boxes(th)
 
     for char in characters:
         # char.letter = get_character_letter(char.image)
@@ -81,10 +86,8 @@ def main():
     cv2.destroyAllWindows()
     cv2.waitKey(1)
 
-    # TODO Write out each character to output folders, for use in the neural network
-    write_chars_to_file(characters)
-
-    exit()
+    # TODO Write out each character to image_output folders, for use in the neural network
+    write_chars_to_file(characters, output_path)
 
 
 def merge_short_edges(e):
@@ -97,4 +100,12 @@ def merge_short_edges(e):
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 3:
+        exit("Not enough arguments given")
+
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+    print("Reading image from %s" % input_path)
+    print("Outputting image to %s" % output_path)
+
+    main(input_path, output_path)

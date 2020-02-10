@@ -1,3 +1,4 @@
+import array
 from math import sqrt
 
 import cv2
@@ -6,7 +7,7 @@ from imutils.contours import sort_contours
 from skimage.morphology import skeletonize
 
 from character import Character
-from globals import SHOW_STEPS, WAIT_TIME
+from globals import SHOW_STEPS, WAIT_TIME, SINGLE_CHARACTER_IMAGES
 
 
 def get_skeletons(char: Character):
@@ -26,6 +27,10 @@ def get_skeletons(char: Character):
     contours, hierarchy = cv2.findContours(char.image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # Sort the contours left-to-right
     contours, _ = sort_contours(contours, "left-to-right")
+    if SINGLE_CHARACTER_IMAGES:
+        image_size = char.image.shape
+        contours = tuple(np.asarray([[[[0, 0]], [[image_size[0], image_size[1]]]]]))
+
     for contour in contours:
         if cv2.arcLength(contour, True) > 40:
             # Initialize mask
@@ -72,15 +77,19 @@ def skeleton_jointpoints(skel):
 
     # apply the convolution
     kernel = np.uint8([[1, 3, 1],
-                       [3, 10, 3],
+                       [3, 1, 3],
                        [1, 3, 1]])
     src_depth = -1
     filtered = cv2.filter2D(skel, src_depth, kernel)
+    # FOR DEBUGGING
+    # cv2.namedWindow('filtered', cv2.WINDOW_NORMAL)
+    # cv2.imshow('filtered', filtered)
+    # cv2.waitKey(0)
 
     # now look through to find the value greater than or equal to 17 (i.e has at least 3 neighbouring pixels,
     # and at least 2 of them are in the horizontal/vertical direction
     # this returns a mask of the jointpoints
-    rows, cols = np.where(filtered >= 17)
+    rows, cols = np.where(filtered >= 9)
     coords = list(zip(cols, rows))
 
     # Remove all jointpoints that are next to each other (i.e. distance < sqrt(2) which we say is ~ 1.5
@@ -99,7 +108,8 @@ def remove_close_points(coords_to_filter, coords_for_comparison):
             # Pythagoras to figure out distance
             distance = sqrt((abs(x1 - x2)) ** 2 + (abs(y1 - y2)) ** 2)
             if distance < 1.5:
-                print("Joint/End Points %s and %s are very close (%s), removing %s" % (point1, point2, distance, point1))
+                print(
+                    "Joint/End Points %s and %s are very close (%s), removing %s" % (point1, point2, distance, point1))
                 coords_to_filter.remove(point1)
 
 

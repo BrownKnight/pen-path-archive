@@ -28,8 +28,20 @@ def extract_edges(char: Character, img):
             edge = find_edge_path(path_start_point, joint_end_points.copy(), possible_points)
             if edge is not None and len(edge) > 2:
                 new_points_found = True
-                edges.append(edge)
-                for point in edge:
+
+                # Add information about the endpoints to the edge
+                improved_edge = [(value[0], value[1], 64) for value in edge]
+                if edge[0] in char.endpoints:
+                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 192)
+                if edge[-1] in char.endpoints:
+                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 192)
+                if edge[0] in char.jointpoints:
+                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 128)
+                if edge[-1] in char.jointpoints:
+                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 128)
+
+                edges.append(improved_edge)
+                for point in improved_edge:
                     img[point[1], point[0]] = 255
 
     print("Number of edges: %s" % len(edges))
