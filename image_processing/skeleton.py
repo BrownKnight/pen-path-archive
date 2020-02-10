@@ -77,7 +77,7 @@ def skeleton_jointpoints(skel):
 
     # apply the convolution
     kernel = np.uint8([[1, 3, 1],
-                       [3, 1, 3],
+                       [3, 10, 3],
                        [1, 3, 1]])
     src_depth = -1
     filtered = cv2.filter2D(skel, src_depth, kernel)
@@ -89,7 +89,7 @@ def skeleton_jointpoints(skel):
     # now look through to find the value greater than or equal to 17 (i.e has at least 3 neighbouring pixels,
     # and at least 2 of them are in the horizontal/vertical direction
     # this returns a mask of the jointpoints
-    rows, cols = np.where(filtered >= 9)
+    rows, cols = np.where(filtered >= 17)
     coords = list(zip(cols, rows))
 
     # Remove all jointpoints that are next to each other (i.e. distance < sqrt(2) which we say is ~ 1.5

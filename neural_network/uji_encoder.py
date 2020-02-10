@@ -56,8 +56,8 @@ def format_data_file(data_path, data_output_path):
         if any([point[0] > 62 or point[1] > 62 for point in char]):
             print('Image too big!! %s skipping' % index)
         else:
-            padded_points = np.zeros((100, 3), int)
-            padded_points[:len(char)] = char[:100]
+            padded_points = np.zeros((128, 3), int)
+            padded_points[:len(char)] = char[:128]
 
             with open(data_output_path % index, "w+") as file:
                 file.writelines(["%s,%s,%s\n" % (point[0], point[1], point[2]) for point in padded_points])
