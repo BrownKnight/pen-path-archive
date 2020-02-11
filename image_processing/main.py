@@ -91,15 +91,6 @@ def main(input_path, output_path):
     write_chars_to_file(characters, output_path)
 
 
-def merge_short_edges(e):
-    """TODO: NOT USED AT THIS MOMENT, PROBABLY SHOULDN'T BE EITHER"""
-    edges = e.copy()
-    for i in range(len(edges)):
-        for j in range(len(edges)):
-            if len(edges[i]) < 5 or len(edges[j]) < 5:
-                print("trying to merge a short edge")
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         if len(sys.argv) < 2:

@@ -35,7 +35,7 @@ def format_data_file(data_path, data_output_path):
                 char.append((-1, -1))
 
             else:
-                x, y = line.strip("\n", ).strip(" ").replace("  ", " ").split(" ")
+                x, y = line.strip("\n", ).strip(" ").replace("   ", " ").replace("  ", " ").split(" ")
                 # Divide each coordinate by a given constant to reduce the size of the character
                 char.append((int(int(x) / CHARACTER_SHRINK_MULTIPLIER), int(int(y) / CHARACTER_SHRINK_MULTIPLIER)))
 
@@ -63,7 +63,7 @@ def format_data_file(data_path, data_output_path):
                 file.writelines(["%s,%s,%s\n" % (point[0], point[1], point[2]) for point in padded_points])
 
 
-def create_image_from_file(image_path, output_path):
+def create_image_from_file(image_path, image_output_path):
     with open(image_path) as file:
         lines = file.readlines()
         lines = [line.strip("\n") for line in lines]
@@ -75,13 +75,13 @@ def create_image_from_file(image_path, output_path):
             cv2.line(char, points[i], points[i + 1], 255, 2)
 
     char = cv2.bitwise_not(char)
-    cv2.imwrite(output_path, char)
+    cv2.imwrite(image_output_path, char)
 
     return char
 
 
 if __name__ == "__main__":
-    format_data_file("test/original_data/UJIpenchars-w01", "test/ground_truth/character%s.txt")
+    format_data_file("test/original_data/UJIpenchars-w11", "test/ground_truth/character11-%s.txt")
 
     for file_path in glob.glob("test/ground_truth/*.txt"):
         output_path = "test/image_input/%s.tif" % Path(file_path).stem
