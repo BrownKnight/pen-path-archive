@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from cv2 import cv2
 
 from character_bounding_boxes import get_char_bounding_boxes
+from globals import SHOW_STEPS
 
 
 def convert_points_to_image(file_path):
@@ -28,8 +29,9 @@ def convert_points_to_image(file_path):
             for point in points:
                 test_verify_image[point[1], point[0]] = 255
             print(len(points))
-            cv2.imshow('img', test_verify_image)
-            cv2.waitKey(1)
+            if SHOW_STEPS:
+                cv2.imshow('img', test_verify_image)
+                cv2.waitKey(1)
             result = input("Add this stroke to previous character?")
             if result == "y":
                 add_points_to_array(char_images[i], stroke, x_offset, y_offset, time_offset)

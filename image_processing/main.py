@@ -1,3 +1,4 @@
+import glob
 import sys
 
 import numpy as np
@@ -82,7 +83,7 @@ def main(input_path, output_path):
         edges_image = np.zeros_like(char.image)
         char.edges = extract_edges(char, edges_image)
 
-    cv2.waitKey(0)
+    cv2.waitKey(WAIT_TIME)
     cv2.destroyAllWindows()
     cv2.waitKey(1)
 
@@ -101,11 +102,17 @@ def merge_short_edges(e):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        exit("Not enough arguments given")
+        if len(sys.argv) < 2:
+            exit("No arguments given")
+        print("Only 1 argument given, running in test data creation mode")
+        for file in glob.glob("test/image_input/*.tif"):
+            output_path = "test/image_output/%s.csv" % Path(file).stem
+            main(file, output_path)
+    else:
+        print("2 arguments given, running in single image mode")
+        input_path = sys.argv[1]
+        output_path = sys.argv[2]
+        print("Reading image from %s" % input_path)
+        print("Outputting image to %s" % output_path)
 
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    print("Reading image from %s" % input_path)
-    print("Outputting image to %s" % output_path)
-
-    main(input_path, output_path)
+        main(input_path, output_path)

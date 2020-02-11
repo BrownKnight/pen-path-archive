@@ -12,6 +12,7 @@ from typing import List
 import numpy as np
 
 from character import Character
+from globals import SINGLE_CHARACTER_IMAGES
 
 
 def write_chars_to_file(chars: List[Character], output_path):
@@ -23,5 +24,8 @@ def write_chars_to_file(chars: List[Character], output_path):
         padded_edge_points = np.zeros((128, 3), np.uint8)
         padded_edge_points[:all_edge_points.shape[0]] = all_edge_points[:128]
 
-        with open(output_path % char.letter, "w+") as file:
+        if not SINGLE_CHARACTER_IMAGES:
+            output_path = output_path % char.letter
+
+        with open(output_path, "w+") as file:
             [file.write("%s,%s,%s\n" % (point[0], point[1], point[2])) for point in padded_edge_points]
