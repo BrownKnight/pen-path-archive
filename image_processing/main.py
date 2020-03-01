@@ -31,7 +31,7 @@ def main(input_path, output_path):
 
     # Some smoothing to get rid of the noise
     # img = cv2.bilateralFilter(img, 5, 35, 10)
-    img = cv2.GaussianBlur(img, (3, 3), 3)
+    # img = cv2.GaussianBlur(img, (2, 2), 3)
     # img = cv2.blur(img, (3, 3))
 
     if SINGLE_CHARACTER_IMAGES:
@@ -72,7 +72,8 @@ def main(input_path, output_path):
             cv2.waitKey(int(WAIT_TIME / 3))
 
         # Process the image to get the endpoints and skeletons for each letter
-        print("Getting skeleton for character %s" % char.letter)
+        if SHOW_STEPS:
+            print("Getting skeleton for character %s" % char.letter)
         success = get_skeletons(char)
         if not success:
             print("Skipping the character %s, could not get skeleton" % char.letter)
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         if len(sys.argv) < 2:
             exit("No arguments given")
         print("Only 1 argument given, running in test data creation mode")
-        for file in glob.glob("test/image_input/*.tif"):
+        for file in glob.glob("test/image_input/*.tif").sort():
             output_path = "test/image_output/%s.csv" % Path(file).stem
             main(file, output_path)
     else:

@@ -56,9 +56,10 @@ def get_skeletons(char: Character):
 
             # Draw the endpoints
             [cv2.circle(mask, ep, 3, 180, 1) for ep in char.endpoints]
-            print("Endpoints %s" % char.endpoints)
             [cv2.circle(mask, jp, 3, 120, 1) for jp in char.jointpoints]
-            print("Jointpoints %s" % char.jointpoints)
+            if SHOW_STEPS:
+                print("Endpoints %s" % char.endpoints)
+                print("Jointpoints %s" % char.jointpoints)
 
             if SHOW_STEPS:
                 letter_process_image = np.hstack((comparison_img, mask))
@@ -108,8 +109,9 @@ def remove_close_points(coords_to_filter, coords_for_comparison):
             # Pythagoras to figure out distance
             distance = sqrt((abs(x1 - x2)) ** 2 + (abs(y1 - y2)) ** 2)
             if distance < 1.5:
-                print(
-                    "Joint/End Points %s and %s are very close (%s), removing %s" % (point1, point2, distance, point1))
+                if SHOW_STEPS:
+                    print("Joint/End Points %s and %s are very close (%s), removing %s" % (
+                        point1, point2, distance, point1))
                 coords_to_filter.remove(point1)
 
 

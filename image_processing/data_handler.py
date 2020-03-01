@@ -10,6 +10,7 @@ Z Values:
 import csv
 from typing import List
 import numpy as np
+import matplotlib.pyplot as plt
 
 from character import Character
 from globals import SINGLE_CHARACTER_IMAGES
@@ -28,4 +29,11 @@ def write_chars_to_file(chars: List[Character], output_path):
             output_path = output_path % char.letter
 
         with open(output_path, "w+") as file:
-            [file.write("%s,%s,%s\n" % (point[0], point[1], point[2])) for point in padded_edge_points]
+            print("Writing to %s" % output_path)
+            # image = np.zeros((64, 64))
+            # for point in padded_edge_points:
+            #     image[int(point[1]), int(point[0])] = float(point[2])
+            # print("displaying image")
+            # plt.imshow(image)
+            # plt.show()
+            [file.write("%s,%s,%s\n" % tuple(point)) for point in padded_edge_points]

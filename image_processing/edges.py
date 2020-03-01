@@ -2,6 +2,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 from character import Character
+from globals import SHOW_STEPS
 
 
 def extract_edges(char: Character, img):
@@ -30,32 +31,34 @@ def extract_edges(char: Character, img):
                 new_points_found = True
 
                 # Add information about the endpoints to the edge
-                improved_edge = [(value[0], value[1], 64) for value in edge]
-                if edge[0] in char.endpoints:
-                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 192)
-                if edge[-1] in char.endpoints:
-                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 192)
+                # 1=normal point, 2=jointpoint, 3=endpoint
+                improved_edge = [(value[0], value[1], 1) for value in edge]
                 if edge[0] in char.jointpoints:
-                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 128)
+                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 2)
                 if edge[-1] in char.jointpoints:
-                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 128)
+                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 2)
+                if edge[0] in char.endpoints:
+                    improved_edge[0] = (improved_edge[0][0], improved_edge[0][1], 3)
+                if edge[-1] in char.endpoints:
+                    improved_edge[-1] = (improved_edge[-1][0], improved_edge[-1][1], 3)
 
                 edges.append(improved_edge)
                 for point in improved_edge:
                     img[point[1], point[0]] = 255
 
-    print("Number of edges: %s" % len(edges))
-    for index, edge in enumerate(edges):
-        x = []
-        y = []
-        for point in edge:
-            x.append(point[0])
-            y.append(point[1])
+    if SHOW_STEPS:
+        print("Number of edges: %s" % len(edges))
+        for index, edge in enumerate(edges):
+            x = []
+            y = []
+            for point in edge:
+                x.append(point[0])
+                y.append(point[1])
 
-        plt.plot(x, y, plot_formats[index % len(plot_formats)], antialiased=False, marker='.', ms=0.1)
+            plt.plot(x, y, plot_formats[index % len(plot_formats)], antialiased=False, marker='.', ms=0.1)
 
-    plt.gca().invert_yaxis()
-    plt.show()
+        plt.gca().invert_yaxis()
+        plt.show()
 
     return edges
 
