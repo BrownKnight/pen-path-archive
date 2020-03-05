@@ -1,150 +1,110 @@
+# from sklearn.model_selection import train_test_split
+#
+# # Split the data
+# x_train, x_valid, y_train, y_valid = train_test_split(data, labels, test_size=0.33, shuffle= True)
 import glob
-from pathlib import Path
+
+from tensorflow_core.python.keras import Model
+from tensorflow_core.python.keras.layers import Input, LSTM, RepeatVector, TimeDistributed, Dense, Masking, Embedding, \
+    Reshape
+from tensorflow.keras import models, losses, optimizers
 
 import numpy as np
-import tensorflow as tf
-
-from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 
-NUM_OF_TRAIN_SAMPLES = 40000
+MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
+TEST_SPLIT = 0.1
 
 
-def load_x_data(file_dir):
-    """Loads all the character data from a given directory and outputs it into a numpy array"""
-    file_list = glob.glob(file_dir)
-    file_list.sort()
-    num_of_files = len(file_list)
-    print("Found %s character files" % num_of_files)
-    comparison_list = []
+def main():
+    x_data = load_x("test.nosync/image_output/char-*-000-*-*.csv")
+    target_data = load_y("test.nosync/ground_truth/char-*-000-*-*.txt")
+    normalize_x(x_data)
+    normalize_y(target_data)
+    # print(target_data)
 
-    # Create an array of character point arrays
-    # 64,64,1 for 2D / 128, 3 for 1D
-    chars = np.zeros((num_of_files, 64, 64, 1), dtype=float)
-    for index, file in enumerate(file_list):
-        comparison_list.append(Path(file).stem)
-        with open(file) as f:
-            lines = f.readlines()
-            lines = [line.strip("\n").split(",") for line in lines]
-            # FOR 2D STUFF
-            char = np.zeros((64, 64))
-            for line in lines:
-                char[int(line[1]), int(line[0])] = float(line[2])
-            char = char.reshape((64, 64, 1))
-            # char = [(int(line[0]), int(line[1]), int(line[2])) for line in lines]
-            chars[index] = char
-    # normalise the character data
-    normalise_x(chars)
+    model = create_model()
+    train_model(model, x_data, target_data)
 
-    # Split the data into train/test data
-    train_data, test_data = chars[:NUM_OF_TRAIN_SAMPLES], chars[NUM_OF_TRAIN_SAMPLES:]
-    return train_data, test_data, comparison_list
+    test_data = load_x("test.nosync/image_output/char-01-000-*-*.csv")
+    normalize_x(test_data)
+    model = models.load_model(MODEL_PATH)
+    print(model.summary())
+    predict(model, test_data)
 
 
-def normalise_x(chars):
-    # FOR 2D ONLY
-    chars[:, :, :, 0] /= 3
-    # For 1D Only
-    # chars[:, :, 0] /= 63
-    # chars[:, :, 1] /= 63
-    # chars[:, :, 2] /= 2
+def load_y(path):
+    print("Loading target data from %s" % path)
+    file_paths = glob.glob(path)
+    file_paths.sort()
+    num_files = len(file_paths)
+    data = np.zeros((num_files, 128, 2))
+
+    for index, file_path in enumerate(file_paths):
+        with open(file_path) as file:
+            lines = file.readlines()
+            char = np.asarray([np.asarray(point.split(",")) for point in lines])
+            data[index] = char
+
+    print("Loaded %s character target data files" % num_files)
+
+    return data
 
 
-def denormalise_x(chars):
-    # FOR 2D ONLY
-    chars[:, :, :, 0] *= 3
-    # For 1D Only
-    # chars[:, :, 0] *= 63
-    # chars[:, :, 1] *= 63
-    # chars[:, :, 2] *= 2
+def normalize_y(data):
+    data /= 64
 
 
-def load_y_data(file_dir, comparison_list):
-    """Loads all the ground truth character data from a given directory and outputs it into a numpy array"""
-    file_list = glob.glob(file_dir)
-    # if comparison_list is not None:
-    #     file_list = [file for file in file_list if Path(file).stem in [Path(file).stem for file in comparison_list]]
-    file_list.sort()
-    num_of_files = len(comparison_list)
-    print("Found %s ground truth character files" % num_of_files)
+def load_x(path):
+    print("Loading image data from %s" % path)
+    file_paths = glob.glob(path)
+    file_paths.sort()
+    num_files = len(file_paths)
+    data = np.zeros((num_files, 128, 2))
 
-    # Create an array of character point arrays
-    # 64,64,1 for 2D / 128, 3 for 1D
-    chars = np.zeros((num_of_files, 64, 64, 1), dtype=float)
-    index = 0
-    for file in file_list:
-        if Path(file).stem not in comparison_list:
-            continue
+    for index, file_path in enumerate(file_paths):
+        with open(file_path) as file:
+            lines = file.readlines()
+            char = np.asarray([np.asarray(point.split(",")[:2]) for point in lines])
+            data[index] = char
 
-        with open(file) as f:
-            lines = f.readlines()
-            lines = [line.strip("\n").split(",") for line in lines]
-            # FOR 2D STUFF
-            char = np.zeros((64, 64))
-            for line in lines:
-                char[int(line[1]), int(line[0])] = float(line[2])
-            char = char.reshape((64, 64, 1))
-            # FOR 1D STUFF
-            # char = [(int(line[0]), int(line[1]), int(line[2]), int(line[3])) for line in lines]
-            chars[index] = char
-            index += 1
-    # normalise the character data
-    normalise_y(chars)
+    print("Loaded %s character image files" % num_files)
 
-    # Split the data into train/test data
-    train_data, test_data = chars[:NUM_OF_TRAIN_SAMPLES], chars[NUM_OF_TRAIN_SAMPLES:]
-    return train_data, test_data
+    return data
 
 
-def normalise_y(chars):
-    # FOR 2D ONLY
-    chars[:, :, :, 0] /= 128
-    # For 1D Only
-    # chars[:, :, 0] /= 63
-    # chars[:, :, 1] /= 63
-    # chars[:, :, 2] /= 2
-    # chars[:, :, 3] /= 128
+def normalize_x(data):
+    data /= 64
 
 
-def denormalise_y(chars):
-    # FOR 2D ONLY
-    chars[:, :, :, 0] *= 128
-    # For 1D Only
-    # chars[:, :, 0] *= 63
-    # chars[:, :, 1] *= 63
-    # chars[:, :, 2] *= 2
-    # chars[:, :, 3] *= 128
+def create_model():
+    encoder_inputs = Input(shape=(128, 2))
+    masked_encoder_inputs = Masking()(encoder_inputs)
+    encoder_lstm = LSTM(100, return_state=True)
+    encoder_outputs, state_h, state_c = encoder_lstm(masked_encoder_inputs)
+    # We discard `encoder_outputs` and only keep the states.
+    encoder_states = [state_h, state_c]
+
+    decoder_inputs = Input(shape=(128, 2), )
+    masked_decoder_inputs = Masking()(decoder_inputs)
+    decoder_lstm = LSTM(100, return_state=True, return_sequences=True)
+    decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
+
+    outputs = TimeDistributed(Dense(2, activation='sigmoid'))(decoder_outputs)
+
+    model = Model([encoder_inputs, decoder_inputs], outputs)
+    model.compile(optimizer=optimizers.Adam(learning_rate=0.00005), loss=losses.MeanAbsoluteError(),
+                  metrics=["accuracy"])
+
+    print(model.summary())
+
+    return model
 
 
-def create_network():
-    autoencoder = models.Sequential()
-    autoencoder.add(layers.Input(shape=(64, 64, 1)))
-    autoencoder.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    autoencoder.add(layers.MaxPooling2D((2, 2)))
-    autoencoder.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    autoencoder.add(layers.MaxPooling2D((2, 2)))
-    # Bottleneck Here
-    autoencoder.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    autoencoder.add(layers.UpSampling2D((2, 2)))
-    autoencoder.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    autoencoder.add(layers.UpSampling2D((2, 2)))
-    autoencoder.add(layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same'))
-    print(autoencoder.summary())
-
-    autoencoder.compile(optimizer='adam',
-                        loss=tf.keras.losses.binary_crossentropy,
-                        metrics=['accuracy'])
-    return autoencoder
-
-
-def train():
-    train_x, test_x, file_list = load_x_data("test/image_output/char-*.csv")
-    train_y, test_y = load_y_data("test/ground_truth/char-*.txt", file_list)
-
-    model = create_network()
-
-    history = model.fit(train_y, train_y, batch_size=50, epochs=8, verbose=1,
-                        validation_data=(test_y, test_y))
+def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarray):
+    print("Training Model")
+    history = model.fit([train_x, train_x], train_y, batch_size=256, epochs=400, verbose=1, validation_split=TEST_SPLIT,
+                        shuffle=True)
 
     plt.plot(history.history['accuracy'], label='accuracy')
     plt.plot(history.history['val_accuracy'], label='val_accuracy')
@@ -156,61 +116,45 @@ def train():
     plt.legend(loc='lower right')
     plt.show()
 
-    test_loss, test_acc = model.evaluate(train_x, train_y, verbose=2)
-    print("Loss: %s" % test_loss)
-    print("Acc: %s" % test_acc)
-    model.save("model.h5")
+    model.save(MODEL_PATH)
 
 
-def predict():
-    model = models.load_model("model.h5")
-    model.summary()
-    input_data, _, file_list = load_x_data("test/image_output/char-01-08-002.csv")
-    # input_data, _ = load_y_data("test/ground_truth/char-01-08-002.txt", file_list)
-    ground_truth, _ = load_y_data("test/ground_truth/char-01-08-002.txt", file_list)
+def predict(model: models.Sequential, test_data: np.ndarray):
+    result = model.predict([test_data, test_data])
 
-    denormalise_x(input_data)
-    # denormalise_y(input_data)
-    input_data = input_data[:1]
+    result = result[0] * 64
+    # result = result[0]
+    print(result)
+    np.savetxt("test.nosync/result.txt", result)
+    result_image = create_image_from_data(result)
 
-    denormalise_y(ground_truth)
-    ground_truth = ground_truth[:1]
+    test = test_data[0] * 64
+    test_image = create_image_from_data(test)
 
-    result = model.predict(input_data)
-    denormalise_y(result)
-    with open('test/result.txt', 'w+') as result_file:
-        result_file.writelines(["%s" % line for line in result])
-    # print(result)
+    # write the result array to file
 
-    input_image = create_image_from_coords(input_data[0])
-    output_image = create_image_from_coords(result[0])
-    ground_truth_image = create_image_from_coords(ground_truth[0])
-
-    fig, (ax1, ax2, ax3) = plt.subplots(figsize=(13, 3), ncols=3)
-
-    colorbar1 = ax1.imshow(input_image)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    colorbar1 = ax1.imshow(test_image)
     fig.colorbar(colorbar1, ax=ax1)
-    colorbar2 = ax2.imshow(output_image)
+    colorbar2 = ax2.imshow(result_image)
     fig.colorbar(colorbar2, ax=ax2)
-    colorbar3 = ax3.imshow(ground_truth_image)
-    fig.colorbar(colorbar3, ax=ax3)
 
     plt.show()
 
 
-def create_image_from_coords(input_image: np.ndarray):
-    image = np.zeros((64, 64))
-    input_image = input_image.astype(int)
-    if input_image.shape == (128, 3):
-        for coord in input_image:
-            image[coord[1], coord[0]] = coord[2] + 1
-    else:
-        image = input_image.reshape((64, 64))
+def create_image_from_data(data: np.ndarray):
+    image = np.zeros((64, 64), float)
+    for i, point in enumerate(data):
+        x = int(point[0])
+        y = int(point[1])
+
+        if x == 0 and y == 0:
+            continue
+
+        image[y, x] = i + 1
 
     return image
 
 
 if __name__ == "__main__":
-    # create_network()
-    # train()
-    predict()
+    main()
