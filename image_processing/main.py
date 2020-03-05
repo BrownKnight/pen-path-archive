@@ -97,8 +97,10 @@ if __name__ == "__main__":
         if len(sys.argv) < 2:
             exit("No arguments given")
         print("Only 1 argument given, running in test data creation mode")
-        for file in glob.glob("test/image_input/*.tif").sort():
-            output_path = "test/image_output/%s.csv" % Path(file).stem
+        file_paths = glob.glob("test.nosync/image_input/*.tif")
+        file_paths.sort()
+        for file in file_paths:
+            output_path = "test.nosync/image_output/%s.csv" % Path(file).stem
             main(file, output_path)
     else:
         print("2 arguments given, running in single image mode")
