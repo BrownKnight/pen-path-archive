@@ -12,21 +12,22 @@ from tensorflow.keras import models, losses, optimizers
 import numpy as np
 import matplotlib.pyplot as plt
 
-MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
+# MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
+MODEL_PATH = "models/autoencoder_lstm_functional.h5"
 TEST_SPLIT = 0.1
 
 
 def main():
-    x_data = load_x("test.nosync/image_output/char-*-000-*-*.csv")
-    target_data = load_y("test.nosync/ground_truth/char-*-000-*-*.txt")
-    normalize_x(x_data)
-    normalize_y(target_data)
+    # x_data = load_x("test.nosync/image_output/char-*-000-*-*.csv")
+    # target_data = load_y("test.nosync/ground_truth/char-*-000-*-*.txt")
+    # normalize_x(x_data)
+    # normalize_y(target_data)
     # print(target_data)
 
-    model = create_model()
-    train_model(model, x_data, target_data)
+    # model = create_model()
+    # train_model(model, x_data, target_data)
 
-    test_data = load_x("test.nosync/image_output/char-01-000-*-*.csv")
+    test_data = load_x("test.nosync/ground_truth/char-01-000-*-*.txt")
     normalize_x(test_data)
     model = models.load_model(MODEL_PATH)
     print(model.summary())
@@ -48,6 +49,7 @@ def load_y(path):
 
     print("Loaded %s character target data files" % num_files)
 
+    np.random.shuffle(data)
     return data
 
 
@@ -80,14 +82,14 @@ def normalize_x(data):
 def create_model():
     encoder_inputs = Input(shape=(128, 2))
     masked_encoder_inputs = Masking()(encoder_inputs)
-    encoder_lstm = LSTM(100, return_state=True)
+    encoder_lstm = LSTM(256, return_state=True)
     encoder_outputs, state_h, state_c = encoder_lstm(masked_encoder_inputs)
     # We discard `encoder_outputs` and only keep the states.
     encoder_states = [state_h, state_c]
 
     decoder_inputs = Input(shape=(128, 2), )
     masked_decoder_inputs = Masking()(decoder_inputs)
-    decoder_lstm = LSTM(100, return_state=True, return_sequences=True)
+    decoder_lstm = LSTM(256, return_state=True, return_sequences=True)
     decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
 
     outputs = TimeDistributed(Dense(2, activation='sigmoid'))(decoder_outputs)
