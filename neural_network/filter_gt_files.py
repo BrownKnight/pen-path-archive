@@ -5,7 +5,7 @@ image_input files that are not present in the image_output
 import glob
 from pathlib import Path
 
-image_output_file_paths = glob.glob("test.nosync/image_output/*")
+image_output_file_paths = sorted(glob.glob("test.nosync/image_output/*"))
 image_output_file_names = [Path(name).stem for name in image_output_file_paths]
 print("Found %s image_output files" % len(image_output_file_names))
 
