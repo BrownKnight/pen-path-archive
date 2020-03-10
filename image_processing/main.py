@@ -52,7 +52,7 @@ def main(input_path, output_path):
     # Process the image to get the endpoints and skeletons for each letter
     success = get_skeletons(character)
     if not success:
-        exit("Could not get skeleton")
+        print("Could not get skeleton")
 
     character.edges = extract_edges(character)
 
