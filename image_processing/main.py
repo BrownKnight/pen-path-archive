@@ -93,20 +93,25 @@ def main(input_path, output_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        if len(sys.argv) < 2:
-            exit("No arguments given")
-        print("Only 1 argument given, running in test data creation mode")
+    args = sys.argv
+    mode = ""
+    if len(args) == 2:
+        mode = args[1]
+
+    if mode == 'single':
+        print("Operating in single file mode")
+        input_path = "test.nosync/image_input/char-01-000-12-04.tif"
+        output_path = "test.nosync/image_output/char-01-000-12-04.csv"
+        print("Reading image from %s" % input_path)
+        print("Outputting image data to %s" % output_path)
+
+        main(input_path, output_path)
+    elif mode == 'directory':
+        print("Operating in directory mode")
         file_paths = glob.glob("test.nosync/image_input/*.tif")
         file_paths.sort()
         for file in file_paths:
             output_path = "test.nosync/image_output/%s.csv" % Path(file).stem
             main(file, output_path)
     else:
-        print("2 arguments given, running in single image mode")
-        input_path = sys.argv[1]
-        output_path = sys.argv[2]
-        print("Reading image from %s" % input_path)
-        print("Outputting image to %s" % output_path)
-
-        main(input_path, output_path)
+        exit("Incorrect arguments given. Supports args: 'single' | 'directory")

@@ -4,6 +4,7 @@
       <w>jointpoints</w>
       <w>pathing</w>
       <w>pytesseract</w>
+      <w>relu</w>
       <w>skeletonize</w>
     </words>
   </dictionary>
