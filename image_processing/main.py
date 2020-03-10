@@ -38,7 +38,8 @@ def main(input_path, output_path):
 
     character = Character()
     character.progress_image = img
-    cv2.namedWindow("progress", flags=cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+    if SHOW_STEPS:
+        cv2.namedWindow("progress", flags=cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
 
     # Preprocessing to get the shapes
     threshold_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -55,9 +56,10 @@ def main(input_path, output_path):
 
     character.edges = extract_edges(character)
 
-    cv2.waitKey(1000000)
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
+    if SHOW_STEPS:
+        cv2.waitKey(1000000)
+        cv2.destroyAllWindows()
+        cv2.waitKey(1)
 
     # TODO Write out each character to image_output folders, for use in the neural network
     write_chars_to_file(character, output_path)
@@ -79,9 +81,10 @@ if __name__ == "__main__":
         main(input_path, output_path)
     elif mode == 'directory':
         print("Operating in directory mode")
-        file_paths = glob.glob("test.nosync/image_input/*.tif")
-        file_paths.sort()
-        for file in file_paths:
+        file_paths = sorted(glob.glob("test.nosync/image_input/*.tif"))
+        for index, file in enumerate(file_paths):
+            if index % 100 == 0:
+                print("Processing file %s" % file)
             output_path = "test.nosync/image_output/%s.csv" % Path(file).stem
             main(file, output_path)
     else:
