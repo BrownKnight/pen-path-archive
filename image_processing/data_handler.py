@@ -13,27 +13,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from character import Character
-from globals import SINGLE_CHARACTER_IMAGES
 
 
-def write_chars_to_file(chars: List[Character], output_path):
-    for char in chars:
-        if not char.usable:
-            continue
+def write_chars_to_file(char: Character, output_path):
+    if not char.usable:
+        return
 
-        all_edge_points = np.concatenate(char.edges)
-        padded_edge_points = np.zeros((128, 3), np.uint8)
-        padded_edge_points[:all_edge_points.shape[0]] = all_edge_points[:128]
+    all_edge_points = np.concatenate(char.edges)
+    padded_edge_points = np.zeros((128, 3), np.uint8)
+    padded_edge_points[:all_edge_points.shape[0]] = all_edge_points[:128]
 
-        if not SINGLE_CHARACTER_IMAGES:
-            output_path = output_path % char.letter
-
-        with open(output_path, "w+") as file:
-            print("Writing to %s" % output_path)
-            # image = np.zeros((64, 64))
-            # for point in padded_edge_points:
-            #     image[int(point[1]), int(point[0])] = float(point[2])
-            # print("displaying image")
-            # plt.imshow(image)
-            # plt.show()
-            [file.write("%s,%s,%s\n" % tuple(point)) for point in padded_edge_points]
+    with open(output_path, "w+") as file:
+        print("Writing to %s" % output_path)
+        # image = np.zeros((64, 64))
+        # for point in padded_edge_points:
+        #     image[int(point[1]), int(point[0])] = float(point[2])
+        # print("displaying image")
+        # plt.imshow(image)
+        # plt.show()
+        [file.write("%s,%s,%s\n" % tuple(point)) for point in padded_edge_points]

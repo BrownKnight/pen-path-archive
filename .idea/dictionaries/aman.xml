@@ -6,6 +6,7 @@
       <w>pytesseract</w>
       <w>relu</w>
       <w>skeletonize</w>
+      <w>skeletonized</w>
     </words>
   </dictionary>
 </component>

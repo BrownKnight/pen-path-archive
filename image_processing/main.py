@@ -8,7 +8,7 @@ from pathlib import Path
 
 from character import Character
 from data_handler import write_chars_to_file
-from globals import SHOW_STEPS, WAIT_TIME, SINGLE_CHARACTER_IMAGES
+from globals import SHOW_STEPS, WAIT_TIME
 from character_bounding_boxes import get_char_bounding_boxes
 from edges import extract_edges
 from skeleton import get_skeletons
@@ -34,62 +34,33 @@ def main(input_path, output_path):
     # img = cv2.GaussianBlur(img, (2, 2), 3)
     # img = cv2.blur(img, (3, 3))
 
-    if SINGLE_CHARACTER_IMAGES:
-        img = resize(img, width=64)
-    else:
-        img = resize(img, width=700)
+    img = resize(img, width=64)
 
-    process_image = img
-    if SHOW_STEPS:
-        cv2.imshow("process", process_image)
-        cv2.waitKey(WAIT_TIME)
+    character = Character()
+    character.progress_image = img
+    cv2.namedWindow("progress", flags=cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
 
     # Preprocessing to get the shapes
-    th = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                               cv2.THRESH_BINARY, 35, 11)
+    threshold_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                            cv2.THRESH_BINARY, 35, 11)
 
-    # This needs to happen before the image has its colours inverted to improve the recognition
-    if SINGLE_CHARACTER_IMAGES:
-        character = Character()
-        character.image = th
-        character.letter = "0"
-        characters = [character]
-    else:
-        characters = get_char_bounding_boxes(th)
+    character.image = threshold_image
 
-    for char in characters:
-        # char.letter = get_character_letter(char.image)
+    character.add_to_progress_image(threshold_image, "Threshold")
 
-        # Invert to highlight the shape
-        # char.image = cv2.bitwise_not(char.image)
-        # kernel = np.array([[0, 1, 1],
-        #                    [0, 1, 0],
-        #                    [1, 1, 0]], dtype='uint8')
-        # char.image = cv2.morphologyEx(char.image, cv2.MORPH_CLOSE, kernel)
-        letter_process_image = char.image
-        if SHOW_STEPS:
-            cv2.imshow("letter %s " % char.letter, letter_process_image)
-            cv2.waitKey(int(WAIT_TIME / 3))
+    # Process the image to get the endpoints and skeletons for each letter
+    success = get_skeletons(character)
+    if not success:
+        exit("Could not get skeleton")
 
-        # Process the image to get the endpoints and skeletons for each letter
-        if SHOW_STEPS:
-            print("Getting skeleton for character %s" % char.letter)
-        success = get_skeletons(char)
-        if not success:
-            print("Skipping the character %s, could not get skeleton" % char.letter)
-            continue
+    character.edges = extract_edges(character)
 
-        # For each letter, find the edges
-        # for each letter etc
-        edges_image = np.zeros_like(char.image)
-        char.edges = extract_edges(char, edges_image)
-
-    cv2.waitKey(WAIT_TIME)
+    cv2.waitKey(1000000)
     cv2.destroyAllWindows()
     cv2.waitKey(1)
 
     # TODO Write out each character to image_output folders, for use in the neural network
-    write_chars_to_file(characters, output_path)
+    write_chars_to_file(character, output_path)
 
 
 if __name__ == "__main__":

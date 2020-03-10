@@ -1,34 +1,34 @@
 import glob
 
 from tensorflow_core.python.keras import Model
-from tensorflow_core.python.keras.layers import Input, LSTM, RepeatVector, TimeDistributed, Dense, Masking, Embedding, \
-    Reshape
-from tensorflow.keras import models, losses, optimizers
+from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Masking, Bidirectional, Activation
+from tensorflow.keras import models, losses, optimizers, activations
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
-MODEL_PATH = "models/autoencoder_lstm_functional.h5"
+MODEL_PATH = "models/bi-lstm.h5"
 TEST_SPLIT = 0.1
 
 
-def main():
-    # x_data = load_x("test.nosync/image_output/char-*-000-*-*.csv")
-    # normalize_x(x_data)
-    # target_data = load_y("test.nosync/ground_truth/char-*-000-*-*.txt")
-    # normalize_y(target_data)
-    # print(target_data)
-    #
-    # model = create_model()
-    # train_model(model, target_data, target_data)
+def capped_relu(x):
+    return activations.relu(x, max_value=1.0)
 
-    # test_data = load_y("test.nosync/ground_truth/char-01-000-*-*.txt")
-    test_data = load_x("test.nosync/image_output/char-*-000-*-*.csv")
-    normalize_x(test_data)
-    model = models.load_model(MODEL_PATH)
+
+def main():
+    x_data = load_x("test.nosync/image_output/char-01-000-*-*.csv")
+    normalize_x(x_data)
+    y_data = load_y("test.nosync/ground_truth/char-01-000-*-*.txt")
+    normalize_y(y_data)
+
+    model = create_model()
+    train_model(model, x_data, y_data)
+
+    model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
     print(model.summary())
-    predict(model, test_data)
+
+    predict(model, x_data, y_data)
 
 
 def load_y(path):
@@ -46,7 +46,6 @@ def load_y(path):
 
     print("Loaded %s character target data files" % num_files)
 
-    np.random.shuffle(data)
     return data
 
 
@@ -59,12 +58,12 @@ def load_x(path):
     file_paths = glob.glob(path)
     file_paths.sort()
     num_files = len(file_paths)
-    data = np.zeros((num_files, 128, 2))
+    data = np.zeros((num_files, 128, 3))
 
     for index, file_path in enumerate(file_paths):
         with open(file_path) as file:
             lines = file.readlines()
-            char = np.asarray([np.asarray(point.split(",")[:2]) for point in lines])
+            char = np.asarray([np.asarray(point.split(",")[:3]) for point in lines])
             data[index] = char
 
     print("Loaded %s character image files" % num_files)
@@ -73,26 +72,36 @@ def load_x(path):
 
 
 def normalize_x(data):
-    data /= 64
+    data[:, :, 0] /= 64
+    data[:, :, 1] /= 64
+    data[:, :, 2] /= 3
 
 
 def create_model():
-    encoder_inputs = Input(shape=(128, 2))
-    masked_encoder_inputs = Masking()(encoder_inputs)
-    encoder_lstm = LSTM(1024, return_state=True)
-    encoder_outputs, state_h, state_c = encoder_lstm(masked_encoder_inputs)
-    # We discard `encoder_outputs` and only keep the states.
-    encoder_states = [state_h, state_c]
-
-    decoder_inputs = Input(shape=(128, 2), )
-    masked_decoder_inputs = Masking()(decoder_inputs)
-    decoder_lstm = LSTM(1024, return_state=True, return_sequences=True)
-    decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
-
-    outputs = TimeDistributed(Dense(2, activation='sigmoid'))(decoder_outputs)
-
-    model = Model([encoder_inputs, decoder_inputs], outputs)
-    model.compile(optimizer=optimizers.Adam(learning_rate=0.00003), loss=losses.MeanAbsoluteError(),
+    # encoder_inputs = Input(shape=(128, 2))
+    # masked_encoder_inputs = Masking()(encoder_inputs)
+    # encoder_lstm = Bidirectional(LSTM(128, return_state=True), merge_mode='sum')
+    # encoder_outputs, state_h, state_c, state_h1, state_c1 = encoder_lstm(masked_encoder_inputs)
+    # # We discard `encoder_outputs` and only keep the states.
+    # encoder_states = [state_h, state_c, state_h1, state_c1]
+    #
+    # decoder_inputs = Input(shape=(128, 2))
+    # masked_decoder_inputs = Masking()(decoder_inputs)
+    # decoder_lstm = Bidirectional(LSTM(128, return_state=True, return_sequences=True), merge_mode='sum')
+    # decoder_outputs, _, _, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
+    #
+    # outputs = TimeDistributed(Dense(2, activation='sigmoid'))(decoder_outputs)
+    #
+    # model = Model([encoder_inputs, decoder_inputs], outputs)
+    model = models.Sequential([
+        Input((128, 3)),
+        Masking(),
+        Bidirectional(LSTM(512, return_sequences=True)),
+        Bidirectional(LSTM(512, return_sequences=True)),
+        Bidirectional(LSTM(512, return_sequences=True)),
+        TimeDistributed(Dense(2, activation=capped_relu))
+    ])
+    model.compile(optimizer=optimizers.Adam(learning_rate=0.00002), loss=losses.MeanAbsoluteError(),
                   metrics=["accuracy"])
 
     print(model.summary())
@@ -102,7 +111,7 @@ def create_model():
 
 def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarray):
     print("Training Model")
-    history = model.fit([train_x, train_x], train_y, batch_size=256, epochs=1000, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit(train_x, train_y, batch_size=64, epochs=300, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True)
 
     plt.plot(history.history['accuracy'], label='accuracy')
@@ -118,25 +127,29 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
     model.save(MODEL_PATH)
 
 
-def predict(model: models.Sequential, test_data: np.ndarray):
-    result = model.predict([test_data, test_data])
+def predict(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarray):
+    result = model.predict(test_data)
 
-    result = result[0] * 64
-    # result = result[0]
+    data_index = 3
+
+    result = result[data_index] * 64
     print(result)
     np.savetxt("test.nosync/result.txt", result)
     result_image = create_image_from_data(result)
 
-    test = test_data[0] * 64
+    test = test_data[data_index] * 64
     test_image = create_image_from_data(test)
 
-    # write the result array to file
+    ground_truth = ground_truth[data_index] * 64
+    ground_truth = create_image_from_data(ground_truth)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
     colorbar1 = ax1.imshow(test_image)
     fig.colorbar(colorbar1, ax=ax1)
     colorbar2 = ax2.imshow(result_image)
     fig.colorbar(colorbar2, ax=ax2)
+    colorbar3 = ax3.imshow(ground_truth)
+    fig.colorbar(colorbar3, ax=ax3)
 
     plt.show()
 
