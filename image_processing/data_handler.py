@@ -24,7 +24,7 @@ def write_chars_to_file(char: Character, output_path):
     padded_edge_points[:all_edge_points.shape[0]] = all_edge_points[:128]
 
     with open(output_path, "w+") as file:
-        print("Writing to %s" % output_path)
+        # print("Writing to %s" % output_path)
         # image = np.zeros((64, 64))
         # for point in padded_edge_points:
         #     image[int(point[1]), int(point[0])] = float(point[2])

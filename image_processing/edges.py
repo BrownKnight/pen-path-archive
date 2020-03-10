@@ -29,7 +29,6 @@ def extract_edges(char: Character):
             # find_edge_path will modify possible_points, so we don't end up creating
             # duplicate edges with the same coordinates
             new_edges = find_edge_path([path_start_point], possible_points, joint_end_points.copy())
-            print(new_edges)
             for edge in new_edges:
                 if edge is not None and len(edge) > 2:
                     new_points_found = True
