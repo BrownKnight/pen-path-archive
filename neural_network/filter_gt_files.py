@@ -11,7 +11,7 @@ print("Found %s image_output files" % len(image_output_file_names))
 
 # Look at every file in the ground truth folder,
 # and remove it if the corresponding file doesn't exist in image_output
-ground_truth_files = glob.glob("test.nosync/ground_truth/*")
+ground_truth_files = sorted(glob.glob("test.nosync/ground_truth/*"))
 print("Found %s ground_truth files" % len(ground_truth_files))
 for file_path in ground_truth_files:
     file = Path(file_path)
