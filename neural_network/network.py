@@ -1,14 +1,14 @@
 import glob
 
 from tensorflow_core.python.keras import Model
-from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Masking, Bidirectional, Activation
+from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Masking, Bidirectional, Concatenate
 from tensorflow.keras import models, losses, optimizers, activations
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
-MODEL_PATH = "models/bi-lstm.h5"
+MODEL_PATH = "models/bi-lstm-seq2seq-300_epoch.h5"
 TEST_SPLIT = 0.1
 
 
@@ -78,29 +78,37 @@ def normalize_x(data):
 
 
 def create_model():
-    # encoder_inputs = Input(shape=(128, 2))
-    # masked_encoder_inputs = Masking()(encoder_inputs)
-    # encoder_lstm = Bidirectional(LSTM(128, return_state=True), merge_mode='sum')
-    # encoder_outputs, state_h, state_c, state_h1, state_c1 = encoder_lstm(masked_encoder_inputs)
-    # # We discard `encoder_outputs` and only keep the states.
-    # encoder_states = [state_h, state_c, state_h1, state_c1]
-    #
-    # decoder_inputs = Input(shape=(128, 2))
-    # masked_decoder_inputs = Masking()(decoder_inputs)
-    # decoder_lstm = Bidirectional(LSTM(128, return_state=True, return_sequences=True), merge_mode='sum')
-    # decoder_outputs, _, _, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
-    #
-    # outputs = TimeDistributed(Dense(2, activation='sigmoid'))(decoder_outputs)
-    #
-    # model = Model([encoder_inputs, decoder_inputs], outputs)
-    model = models.Sequential([
-        Input((128, 3)),
-        Masking(),
-        Bidirectional(LSTM(512, return_sequences=True)),
-        Bidirectional(LSTM(512, return_sequences=True)),
-        Bidirectional(LSTM(512, return_sequences=True)),
-        TimeDistributed(Dense(2, activation=capped_relu))
-    ])
+    # ENCODER DECODER
+    encoder_inputs = Input(shape=(128, 3))
+    masked_encoder_inputs = Masking()(encoder_inputs)
+    encoder_lstm = Bidirectional(LSTM(256, return_state=True))
+
+    # We discard `encoder_outputs` and only keep the states.
+    _, forward_h, forward_c, backward_h, backward_c = encoder_lstm(masked_encoder_inputs)
+    state_c = Concatenate()([forward_c, backward_c])
+    state_h = Concatenate()([forward_h, backward_h])
+    encoder_states = [state_h, state_c]
+
+    # Bottleneck Here
+
+    decoder_inputs = Input(shape=(128, 3))
+    masked_decoder_inputs = Masking()(decoder_inputs)
+    decoder_lstm = LSTM(512, return_state=True, return_sequences=True)
+    decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
+
+    outputs = TimeDistributed(Dense(2, activation=capped_relu))(decoder_outputs)
+
+    model = Model([encoder_inputs, decoder_inputs], outputs)
+
+    # # SEQUENTIAL
+    # model = models.Sequential([
+    #     Input((128, 3)),
+    #     Masking(),
+    #     Bidirectional(LSTM(512, return_sequences=True)),
+    #     Bidirectional(LSTM(512, return_sequences=True)),
+    #     TimeDistributed(Dense(2, activation=capped_relu))
+    # ])
+
     model.compile(optimizer=optimizers.Adam(learning_rate=0.00002), loss=losses.MeanAbsoluteError(),
                   metrics=["accuracy"])
 
@@ -111,7 +119,7 @@ def create_model():
 
 def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarray):
     print("Training Model")
-    history = model.fit(train_x, train_y, batch_size=64, epochs=300, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=64, epochs=300, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True)
 
     plt.plot(history.history['accuracy'], label='accuracy')
@@ -128,7 +136,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
 
 
 def predict(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarray):
-    result = model.predict(test_data)
+    result = model.predict([test_data, test_data])
 
     data_index = 3
 
