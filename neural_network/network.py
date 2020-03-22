@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
-MODEL_PATH = "models/bi-lstm-seq2seq-500_epoch.h5"
+MODEL_PATH = "models/bi-lstm-300_epoch-all_data.h5"
 TEST_SPLIT = 0.1
 
 
@@ -22,13 +22,13 @@ def main():
     y_data = load_y("test.nosync/ground_truth/char-01-000-*-*.txt")
     normalize_y(y_data)
 
-    model = create_model()
-    train_model(model, x_data, y_data)
+    # model = create_model()
+    # train_model(model, x_data, y_data)
 
     model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
     print(model.summary())
 
-    predict(model, x_data, y_data)
+    test(model, x_data, y_data)
 
 
 def load_y(path):
@@ -135,17 +135,17 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
     model.save(MODEL_PATH)
 
 
-def predict(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarray):
-    result = model.predict([test_data, test_data])
-
+def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarray):
     data_index = -3
+    test_data = test_data[data_index:data_index+1]
+    result = model.predict(test_data)
 
-    result = result[data_index] * 64
+    result = result[0] * 64
     print(result)
     np.savetxt("test.nosync/result.txt", result)
     result_image = create_image_from_data(result)
 
-    test = test_data[data_index] * 64
+    test = test_data[0] * 64
     test_image = create_image_from_data(test)
 
     ground_truth = ground_truth[data_index] * 64
@@ -162,13 +162,30 @@ def predict(model: models.Sequential, test_data: np.ndarray, ground_truth: np.nd
     plt.show()
 
 
+def predict(model_path, image_path):
+    model: models.Sequential = models.load_model(model_path, custom_objects={"capped_relu": capped_relu})
+    print(model.summary())
+
+
+    image_data = load_x(image_path)
+    normalize_x(image_data)
+    result = model.predict(image_data)
+
+    result = result[0] * 63
+    print(result)
+    np.savetxt("test/result.txt", result)
+
+    image = create_image_from_data(result)
+    return image
+
+
 def create_image_from_data(data: np.ndarray):
     image = np.zeros((64, 64), float)
     for i, point in enumerate(data):
         x = int(point[0])
         y = int(point[1])
 
-        if x == 0 and y == 0:
+        if x <= 1 and y <= 1:
             continue
 
         image[y, x] = i + 1

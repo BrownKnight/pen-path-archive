@@ -1,31 +1,26 @@
 import glob
 import sys
 
-import numpy as np
 import cv2
 from imutils import resize
 from pathlib import Path
 
 from character import Character
 from data_handler import write_chars_to_file
-from globals import SHOW_STEPS, WAIT_TIME
-from character_bounding_boxes import get_char_bounding_boxes
+from globals import SHOW_STEPS
 from edges import extract_edges
 from skeleton import get_skeletons
 
 
 def main(input_path, output_path):
-    """The main function of the program, runs the entire pipeline
+    """
+    The Image Processing Pipeline
 
     The pipeline consists of the following steps
     - Process image (resize, blur etc)
-    - Use pytesseract to extract the location of each character, and the character it is
-    - Skeletonize image to create single-width edges
+    - Skeletonize image to create single-pixel-width edges
     - Extract edge paths for each non-intersecting edge of each letter
-    - TODO Something probably needs to happen here (i.e. more key point extraction)
     - Output all the data
-    - Inject the data into a DNN
-    -
     """
     img = cv2.imread(input_path, 0)
 

@@ -5,12 +5,10 @@
       <sourceFolder url="file://$MODULE_DIR$/image_processing" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/neural_network" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sockets" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/path-recovery" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (pen-path)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-  <component name="TestRunnerService">
-    <option name="PROJECT_TEST_RUNNER" value="Unittests" />
   </component>
 </module>
