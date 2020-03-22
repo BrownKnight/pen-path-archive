@@ -22,8 +22,8 @@ def main():
     y_data = load_y("test.nosync/ground_truth/char-01-000-*-*.txt")
     normalize_y(y_data)
 
-    # model = create_model()
-    # train_model(model, x_data, y_data)
+    model = create_model()
+    train_model(model, x_data, y_data)
 
     model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
     print(model.summary())
@@ -104,8 +104,9 @@ def create_model():
     model = models.Sequential([
         Input((128, 3)),
         Masking(),
-        Bidirectional(LSTM(1024, return_sequences=True)),
-        Bidirectional(LSTM(1024, return_sequences=True)),
+        Bidirectional(LSTM(512, return_sequences=True)),
+        Masking(),
+        Bidirectional(LSTM(512, return_sequences=True)),
         TimeDistributed(Dense(2, activation=capped_relu))
     ])
 
@@ -119,7 +120,7 @@ def create_model():
 
 def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarray):
     print("Training Model")
-    history = model.fit([train_x, train_x], train_y, batch_size=64, epochs=500, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=64, epochs=200, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True)
 
     plt.plot(history.history['accuracy'], label='accuracy')
@@ -140,12 +141,12 @@ def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarr
     test_data = test_data[data_index:data_index+1]
     result = model.predict(test_data)
 
-    result = result[0] * 64
+    result = result[0] * 63
     print(result)
     np.savetxt("test.nosync/result.txt", result)
     result_image = create_image_from_data(result)
 
-    test = test_data[0] * 64
+    test = test_data[0] * 63
     test_image = create_image_from_data(test)
 
     ground_truth = ground_truth[data_index] * 64
