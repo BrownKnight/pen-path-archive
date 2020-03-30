@@ -5,10 +5,10 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/test" />
             <path value="file://$PROJECT_DIR$/image_processing/character_recognition_engine/model" />
             <path value="file://$PROJECT_DIR$/image_processing/character_recognition_engine/data" />
             <path value="file://$PROJECT_DIR$/test.nosync" />
+            <path value="file://$PROJECT_DIR$/test" />
           </resourceRoots>
         </entryData>
       </entry>

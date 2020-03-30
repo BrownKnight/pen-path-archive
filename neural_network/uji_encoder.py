@@ -88,15 +88,16 @@ def create_image_from_file(image_path, image_output_path):
     return char
 
 
-if __name__ == "__main__":
+def main():
     # Create multiple iterations of all 11 data files with various levels of char_shrink and offset
     for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
         for shrink in range(10, 27, 2):
             for offset in range(4, 17, 2):
-                format_data_file("test.nosync/original_data/UJIpenchars-w%02d" % i,
-                                 "test.nosync/ground_truth/char-%02d" % i + "-%03d-" + "%02d-%02d.txt" % (shrink, offset),
+                format_data_file("original_data/UJIpenchars-w%02d" % i,
+                                 "test.nosync/ground_truth/char-%02d" % i + "-%03d-" + "%02d-%02d.txt" % (
+                                 shrink, offset),
                                  char_shrink=shrink,
                                  offset=offset)
 
@@ -105,6 +106,10 @@ if __name__ == "__main__":
         for file_path in glob.glob("test.nosync/ground_truth/char-%02d-*.txt" % i):
             output_path = "test.nosync/image_input/%s.tif" % Path(file_path).stem
             create_image_from_file(file_path, output_path)
+
+
+if __name__ == "__main__":
+    main()
 
     # for file_path in glob.glob("test.nosync/ground_truth/*.txt"):
     #     output_path = "test.nosync/image_input/%s.tif" % Path(file_path).stem
