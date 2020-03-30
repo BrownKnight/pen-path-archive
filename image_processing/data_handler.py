@@ -16,8 +16,15 @@ def write_chars_to_file(char: Character, output_path):
         return
 
     for i in range(len(char.edges)):
-        # only keep every third point in an edge
-        char.edges[i] = char.edges[i][::3]
+        # We want the number of points to be as close to 128 as possible, with a bit of margin
+        if len(char.edges[i]) > 384:
+            char.edges[i] = char.edges[i][::3]
+        elif len(char.edges[i]) > 254:
+            char.edges[i] = char.edges[i][::2]
+        else:
+            # Keep all the points
+            pass
+
 
     all_edge_points = np.concatenate(char.edges)
     padded_edge_points = np.zeros((128, 3), np.uint8)
