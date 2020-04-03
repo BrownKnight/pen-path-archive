@@ -135,10 +135,10 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
     checkpoint = ModelCheckpoint("models/auto_save.h5", monitor='accuracy', verbose=1,
                                  save_best_only=True, mode='auto', period=50)
 
-    history = model.fit([train_x, train_x], train_y, batch_size=48, epochs=1000, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=48, epochs=800, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True, callbacks=[checkpoint])
 
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(10,5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     ax1.plot(history.history['accuracy'], label='accuracy')
     ax1.plot(history.history['val_accuracy'], label='val_accuracy')
     ax1.set_xlabel('Epoch')
@@ -157,7 +157,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
 
 def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarray):
     data_index = 2
-    test_data = test_data[data_index:data_index+1]
+    test_data = test_data[data_index:data_index + 1]
     result = model.predict([test_data, test_data])
 
     result = result[0] * 63
