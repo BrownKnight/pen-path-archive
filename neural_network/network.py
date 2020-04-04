@@ -1,5 +1,3 @@
-import glob
-
 from tensorflow_core.python.keras import Model
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint
 from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate
@@ -9,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
+from image_data_utils import load_y, normalize_y, load_x, normalize_x, create_image_from_data
+
 MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-training.h5"
 # MODEL_PATH = "models/auto_save.h5"
 TEST_SPLIT = 0.1
@@ -19,10 +19,18 @@ def capped_relu(x):
 
 
 def main():
-    x_data = load_x("test.nosync/image_output/char-*-*-*-*.csv")
+    x_path = "test.nosync/image_output/char-*-*-*-*.csv"
+    y_path = "test.nosync/ground_truth/char-*-*-*-*.txt"
+
+    print("Loading image data from %s" % x_path)
+    x_data = load_x(x_path)
     normalize_x(x_data)
-    y_data = load_y("test.nosync/ground_truth/char-*-*-*-*.txt")
+    print("Loaded %s character image files" % len(x_data))
+
+    print("Loading target data from %s" % y_path)
+    y_data = load_y(y_path)
     normalize_y(y_data)
+    print("Loaded %s character target data files" % len(y_data))
 
     print("Shuffling Data")
     np.random.seed(42)
@@ -38,52 +46,6 @@ def main():
     train_model(model, x_data, y_data)
 
     test(model, x_data, y_data)
-
-
-def load_y(path):
-    print("Loading target data from %s" % path)
-    file_paths = glob.glob(path)
-    file_paths.sort()
-    num_files = len(file_paths)
-    data = np.zeros((num_files, 128, 2))
-
-    for index, file_path in enumerate(file_paths):
-        with open(file_path) as file:
-            lines = file.readlines()
-            char = np.asarray([np.asarray(point.split(",")) for point in lines])
-            data[index] = char
-
-    print("Loaded %s character target data files" % num_files)
-
-    return data
-
-
-def normalize_y(data):
-    data /= 63
-
-
-def load_x(path):
-    print("Loading image data from %s" % path)
-    file_paths = glob.glob(path)
-    file_paths.sort()
-    num_files = len(file_paths)
-    data = np.zeros((num_files, 128, 3))
-
-    for index, file_path in enumerate(file_paths):
-        with open(file_path) as file:
-            lines = file.readlines()
-            char = np.asarray([np.asarray(point.split(",")[:3]) for point in lines])
-            data[index] = char
-
-    print("Loaded %s character image files" % num_files)
-
-    return data
-
-
-def normalize_x(data):
-    data[:, :, 0] /= 63
-    data[:, :, 1] /= 63
-    data[:, :, 2] /= 3
 
 
 def create_model():
@@ -181,33 +143,17 @@ def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarr
     plt.show()
 
 
-def predict(model_path, image_path):
-    model: models.Sequential = models.load_model(model_path, custom_objects={"capped_relu": capped_relu})
-    print(model.summary())
-
-    image_data = load_x(image_path)
+def predict(model, image_data):
     normalize_x(image_data)
-    result = model.predict([image_data, image_data])
+    predicted_path = model.predict([image_data, image_data])
 
-    result = result[0] * 63
-    print(result)
-    np.savetxt("test/result.txt", result)
+    predicted_path = predicted_path[0] * 63
 
-    image = create_image_from_data(result)
-    return image
+    return predicted_path
 
-def create_image_from_data(data: np.ndarray):
-    image = np.zeros((64, 64), float)
-    for i, point in enumerate(data):
-        x = int(point[0])
-        y = int(point[1])
 
-        if x <= 1 and y <= 1:
-            continue
-
-        image[y, x] = i + 1
-
-    return image
+def load_model(model_path):
+    return models.load_model(model_path, custom_objects={"capped_relu": capped_relu})
 
 
 if __name__ == "__main__":

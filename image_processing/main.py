@@ -68,8 +68,8 @@ if __name__ == "__main__":
 
     if mode == 'single':
         print("Operating in single file mode")
-        input_path = "test.nosync/image_input/char-01-000-12-04.tif"
-        output_path = "test.nosync/image_output/char-01-000-12-04.csv"
+        input_path = "test/d.tiff"
+        output_path = "test/d.csv"
         print("Reading image from %s" % input_path)
         print("Outputting image data to %s" % output_path)
 
