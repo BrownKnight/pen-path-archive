@@ -2,8 +2,7 @@ import glob
 
 from tensorflow_core.python.keras import Model
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint
-from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Masking, Bidirectional, \
-    Concatenate, RepeatVector
+from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate
 from tensorflow.keras import models, losses, optimizers, activations
 
 import numpy as np
@@ -188,7 +187,7 @@ def predict(model_path, image_path):
 
     image_data = load_x(image_path)
     normalize_x(image_data)
-    result = model.predict(image_data)
+    result = model.predict([image_data, image_data])
 
     result = result[0] * 63
     print(result)
@@ -196,7 +195,6 @@ def predict(model_path, image_path):
 
     image = create_image_from_data(result)
     return image
-
 
 def create_image_from_data(data: np.ndarray):
     image = np.zeros((64, 64), float)
