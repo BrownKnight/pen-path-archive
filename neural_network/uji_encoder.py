@@ -1,11 +1,16 @@
 import glob
+import math
 from pathlib import Path
 
 import numpy as np
 from cv2 import cv2
 
+IMAGE_INPUT_DIR = "test.nosync/image_input"
+IMAGE_OUTPUT_DIR = "test.nosync/image_output"
+GROUND_TRUTH_DIR = "test.nosync/ground_truth"
 
-def format_data_file(data_path, data_output_path, char_shrink, offset):
+
+def format_data_file(data_path, data_output_path, char_shrink, offset, rotation):
     chars = []
 
     with open("%s" % data_path) as file:
@@ -23,7 +28,6 @@ def format_data_file(data_path, data_output_path, char_shrink, offset):
                  ]
 
         char = []
-        mark_as_pen_down = False
         for line in lines:
             # Lines are written in the format (x,y,point_type,time_step)
             # Where point_type is 1=normal, 2=stroke_startpoint, 3=stroke_endpoint
@@ -31,15 +35,6 @@ def format_data_file(data_path, data_output_path, char_shrink, offset):
                 if char:
                     chars.append(char)
                 char = []
-
-            # elif "PEN_UP" in line:
-            #     # char[-1] = (char[-1][0], char[-1][1], 3)
-            #     print("Do Nothing")
-            #
-            # elif "PEN_DOWN" in line:
-            #     # mark_as_pen_down = True
-            #     print("Do Nothing")
-
             else:
                 x, y = line.strip("\n", ).strip(" ").replace("   ", " ").replace("  ", " ").split(" ")
                 # point_type = 2 if mark_as_pen_down else 1
@@ -47,28 +42,41 @@ def format_data_file(data_path, data_output_path, char_shrink, offset):
                 # Divide each coordinate by a given constant to reduce the size of the character
                 char.append((int(int(x) / char_shrink), int(int(y) / char_shrink)))
 
-    average_char_length = sum([len(char) for char in chars]) / len(chars)
-    # print(average_char_length)
-    # print(max([len(char) for char in chars]))
-
     for index, char in enumerate(chars):
         # Remove any padding from the top-left of the points to reduce the image size
         # Add 2 to the offset to give each character a suitable border for the image processing
         x_offset = min([point[0] for point in char]) - offset
         y_offset = min([point[1] for point in char]) - offset
 
-        char = [(point[0] - x_offset, point[1] - y_offset, position) for position, point in enumerate(char)]
+        # Apply an offset to each point
+        char = [(x - x_offset, y - y_offset) for x, y in char]
 
-        if any([point[0] > 62 or point[1] > 62 for point in char]):
+        # Add a rotation to each point
+        char = [rotate_coords(x, y, rotation) for x, y in char]
+
+        if any([x > 62 or y > 62 or x < 0 or y < 0 for x, y in char]):
             # print('Image too big!! %s skipping' % index)
             pass
         else:
-            padded_points = np.zeros((128, 3), int)
+            padded_points = np.zeros((128, 2), int)
             padded_points[:len(char)] = char[:128]
 
             with open(data_output_path % index, "w+") as file:
                 #  file.writelines(["%s,%s,%s\n" % tuple(point) for point in padded_points])
-                file.writelines(["%s,%s\n" % (point[0], point[1]) for point in padded_points])
+                file.writelines(["%s,%s\n" % tuple(point) for point in padded_points])
+
+
+
+def rotate_coords(x, y, rotation):
+    angle = math.radians(rotation)
+
+    ox, oy = 32, 32
+    px, py = x, y
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+
+    return qx, qy
 
 
 def create_image_from_file(image_path, image_output_path):
@@ -93,24 +101,36 @@ def main():
     for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
-        for shrink in range(10, 27, 2):
-            for offset in range(4, 17, 2):
-                format_data_file("original_data/UJIpenchars-w%02d" % i,
-                                 "test.nosync/ground_truth/char-%02d" % i + "-%03d-" + "%02d-%02d.txt" % (
-                                 shrink, offset),
-                                 char_shrink=shrink,
-                                 offset=offset)
+        for shrink in range(10, 27, 3):
+            for offset in range(4, 17, 3):
+                for rotation in [0, 15, 30, 330, 345]:
+                    format_data_file("original_data/UJIpenchars-w%02d" % i,
+                                     "%s/char-%02d" % (GROUND_TRUTH_DIR, i) + "-%03d-" + "s%02d-o%02d-r%03d.txt" % (
+                                         shrink, offset, rotation),
+                                     char_shrink=shrink,
+                                     offset=offset,
+                                     rotation=rotation)
 
         # Create the image files for these generated ground truth files
         print("Creating image files for #%s" % i)
-        for file_path in glob.glob("test.nosync/ground_truth/char-%02d-*.txt" % i):
-            output_path = "test.nosync/image_input/%s.tif" % Path(file_path).stem
+        for file_path in glob.glob("%s/char-%02d-*.txt" % (GROUND_TRUTH_DIR, i)):
+            output_path = "%s/%s.tif" % (IMAGE_INPUT_DIR, Path(file_path).stem)
             create_image_from_file(file_path, output_path)
 
 
 if __name__ == "__main__":
+    Path(GROUND_TRUTH_DIR).mkdir(parents=True, exist_ok=True)
+    Path(IMAGE_INPUT_DIR).mkdir(parents=True, exist_ok=True)
+    Path(IMAGE_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+
     main()
 
-    # for file_path in glob.glob("test.nosync/ground_truth/*.txt"):
-    #     output_path = "test.nosync/image_input/%s.tif" % Path(file_path).stem
+    # for i in [0, 15, 30, 330, 345]:
+    #     data_output_path = "test/ground_truth/char-%03d-" + "%s.txt" % i
+    #     format_data_file("original_data/UJIpenchars-w01",
+    #                      data_output_path,
+    #                      16, 10, i
+    #                      )
+    # for file_path in sorted(glob.glob("test/ground_truth/char-000-*.txt")):
+    #     output_path = "test/image_input/%s.tif" % Path(file_path).stem
     #     create_image_from_file(file_path, output_path)

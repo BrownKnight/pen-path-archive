@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
-MODEL_PATH = "models/bi-lstm-s2s-all_data-training.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-training.h5"
 # MODEL_PATH = "models/auto_save.h5"
 TEST_SPLIT = 0.1
 
@@ -135,7 +135,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
     checkpoint = ModelCheckpoint("models/auto_save.h5", monitor='accuracy', verbose=1,
                                  save_best_only=True, mode='auto', period=50)
 
-    history = model.fit([train_x, train_x], train_y, batch_size=48, epochs=800, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=48, epochs=100, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True, callbacks=[checkpoint])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
