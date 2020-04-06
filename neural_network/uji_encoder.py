@@ -101,9 +101,9 @@ def main():
     for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
-        for shrink in range(10, 27, 3):
-            for offset in range(4, 17, 3):
-                for rotation in [0, 15, 30, 330, 345]:
+        for shrink in range(10, 27, 2):
+            for offset in range(4, 17, 2):
+                for rotation in [270, 340, 20, 90]:
                     format_data_file("original_data/UJIpenchars-w%02d" % i,
                                      "%s/char-%02d" % (GROUND_TRUTH_DIR, i) + "-%03d-" + "s%02d-o%02d-r%03d.txt" % (
                                          shrink, offset, rotation),

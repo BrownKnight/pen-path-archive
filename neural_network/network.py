@@ -1,5 +1,5 @@
 from tensorflow_core.python.keras import Model
-from tensorflow_core.python.keras.callbacks import ModelCheckpoint
+from tensorflow_core.python.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate
 from tensorflow.keras import models, losses, optimizers, activations
 
@@ -91,13 +91,19 @@ def create_model():
     return model
 
 
+def learning_rate_scheduler(epoch, lr):
+    lr = 0.00001
+    return lr
+
+
 def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarray):
     print("Training Model")
     checkpoint = ModelCheckpoint("models/auto_save.h5", monitor='accuracy', verbose=1,
-                                 save_best_only=True, mode='auto', period=50)
+                                 save_best_only=True, mode='auto', period=2)
+    lr_scheduler = LearningRateScheduler(learning_rate_scheduler, verbose=1)
 
-    history = model.fit([train_x, train_x], train_y, batch_size=48, epochs=100, verbose=1, validation_split=TEST_SPLIT,
-                        shuffle=True, callbacks=[checkpoint])
+    history = model.fit([train_x, train_x], train_y, batch_size=128, epochs=40, verbose=1, validation_split=TEST_SPLIT,
+                        shuffle=True, callbacks=[checkpoint, lr_scheduler])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     ax1.plot(history.history['accuracy'], label='accuracy')
