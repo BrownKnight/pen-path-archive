@@ -102,7 +102,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
                                  save_best_only=True, mode='auto', period=2)
     lr_scheduler = LearningRateScheduler(learning_rate_scheduler, verbose=1)
 
-    history = model.fit([train_x, train_x], train_y, batch_size=128, epochs=40, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=256, epochs=50, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True, callbacks=[checkpoint, lr_scheduler])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
@@ -117,6 +117,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('Loss')
     ax2.legend(loc='lower right')
+    plt.savefig("models/training_progress.png")
     plt.show()
 
     model.save(MODEL_PATH)
