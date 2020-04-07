@@ -1,6 +1,7 @@
 from tensorflow_core.python.keras import Model
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint, LearningRateScheduler
-from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate
+from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate, \
+    RepeatVector
 from tensorflow.keras import models, losses, optimizers, activations
 
 import numpy as np
@@ -49,39 +50,37 @@ def main():
 
 
 def create_model():
-    # ENCODER DECODER
-    encoder_inputs = Input(shape=(128, 3))
-    # masked_encoder_inputs = Masking()(encoder_inputs)
-    masked_encoder_inputs = encoder_inputs
-    encoder_lstm = Bidirectional(LSTM(500, return_state=True))
+    # # ENCODER DECODER
+    # encoder_inputs = Input(shape=(128, 3))
+    # # masked_encoder_inputs = Masking()(encoder_inputs)
+    # masked_encoder_inputs = encoder_inputs
+    # encoder_lstm = Bidirectional(LSTM(500, return_state=True))
+    #
+    # # We discard `encoder_outputs` and only keep the states.
+    # _, forward_h, forward_c, backward_h, backward_c = encoder_lstm(masked_encoder_inputs)
+    # state_c = Concatenate()([forward_c, backward_c])
+    # state_h = Concatenate()([forward_h, backward_h])
+    # encoder_states = [state_h, state_c]
+    #
+    # # Bottleneck Here
+    #
+    # decoder_inputs = Input(shape=(128, 3))
+    # # masked_decoder_inputs = Masking()(decoder_inputs)
+    # masked_decoder_inputs = decoder_inputs
+    # decoder_lstm = LSTM(1000, return_state=True, return_sequences=True)
+    # decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
+    #
+    # outputs = TimeDistributed(Dense(2, activation=capped_relu))(decoder_outputs)
+    #
+    # model = Model([encoder_inputs, decoder_inputs], outputs)
 
-    # We discard `encoder_outputs` and only keep the states.
-    _, forward_h, forward_c, backward_h, backward_c = encoder_lstm(masked_encoder_inputs)
-    state_c = Concatenate()([forward_c, backward_c])
-    state_h = Concatenate()([forward_h, backward_h])
-    encoder_states = [state_h, state_c]
-
-    # Bottleneck Here
-
-    decoder_inputs = Input(shape=(128, 3))
-    # masked_decoder_inputs = Masking()(decoder_inputs)
-    masked_decoder_inputs = decoder_inputs
-    decoder_lstm = LSTM(1000, return_state=True, return_sequences=True)
-    decoder_outputs, _, _ = decoder_lstm(masked_decoder_inputs, initial_state=encoder_states)
-
-    outputs = TimeDistributed(Dense(2, activation=capped_relu))(decoder_outputs)
-
-    model = Model([encoder_inputs, decoder_inputs], outputs)
-
-    # # SEQUENTIAL
-    # model = models.Sequential([
-    #     Input((128, 3)),
-    #     Masking(),
-    #     # Bidirectional(LSTM(200)),
-    #     # RepeatVector(128),
-    #     Bidirectional(LSTM(3000, return_sequences=True)),
-    #     TimeDistributed(Dense(2, activation=capped_relu))
-    # ])
+    # SEQUENTIAL
+    model = models.Sequential([
+        Input((128, 3)),
+        Bidirectional(LSTM(500, return_sequences=True)),
+        Bidirectional(LSTM(500, return_sequences=True)),
+        TimeDistributed(Dense(2, activation=capped_relu))
+    ])
 
     model.compile(optimizer=optimizers.Adam(learning_rate=0.0001), loss=losses.MeanAbsoluteError(),
                   metrics=["accuracy"])
@@ -92,7 +91,8 @@ def create_model():
 
 
 def learning_rate_scheduler(epoch, lr):
-    lr = 0.00001
+    if epoch > 50:
+        lr = 0.00001
     return lr
 
 
