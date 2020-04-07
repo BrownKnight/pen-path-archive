@@ -1,4 +1,4 @@
-from uji_encoder import main as uji_encoder
+from neural_network.uji_encoder import main as uji_encoder
 
 print("Creating GT Files")
 uji_encoder()

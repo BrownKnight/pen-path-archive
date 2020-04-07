@@ -97,6 +97,10 @@ def create_image_from_file(image_path, image_output_path):
 
 
 def main():
+    Path(GROUND_TRUTH_DIR).mkdir(parents=True, exist_ok=True)
+    Path(IMAGE_INPUT_DIR).mkdir(parents=True, exist_ok=True)
+    Path(IMAGE_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+
     # Create multiple iterations of all 11 data files with various levels of char_shrink and offset
     for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
@@ -119,10 +123,6 @@ def main():
 
 
 if __name__ == "__main__":
-    Path(GROUND_TRUTH_DIR).mkdir(parents=True, exist_ok=True)
-    Path(IMAGE_INPUT_DIR).mkdir(parents=True, exist_ok=True)
-    Path(IMAGE_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-
     main()
 
     # for i in [0, 15, 30, 330, 345]:
