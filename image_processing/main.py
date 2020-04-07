@@ -60,12 +60,7 @@ def main(input_path, output_path):
     write_chars_to_file(character, output_path)
 
 
-if __name__ == "__main__":
-    args = sys.argv
-    mode = ""
-    if len(args) == 2:
-        mode = args[1]
-
+def run(mode):
     if mode == 'single':
         print("Operating in single file mode")
         input_path = "test/d.tiff"
@@ -84,3 +79,12 @@ if __name__ == "__main__":
             main(file, output_path)
     else:
         exit("Incorrect arguments given. Supports args: 'single' | 'directory")
+
+
+if __name__ == "__main__":
+    args = sys.argv
+    run_mode = ""
+    if len(args) == 2:
+        run_mode = args[1]
+
+    run(run_mode)
