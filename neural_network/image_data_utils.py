@@ -15,7 +15,7 @@ def load_y(path):
             char = np.asarray([np.asarray(point.split(",")) for point in lines])
             data[index] = char
 
-    return data
+    return data.astype(np.float32)
 
 
 def normalize_y(data):
@@ -34,7 +34,7 @@ def load_x(path):
             char = np.asarray([np.asarray(point.split(",")[:3]) for point in lines])
             data[index] = char
 
-    return data
+    return data.astype(np.float32)
 
 
 def normalize_x(data):
