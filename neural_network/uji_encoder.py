@@ -102,12 +102,12 @@ def main():
     Path(IMAGE_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
     # Create multiple iterations of all 11 data files with various levels of char_shrink and offset
-    for i in range(1, 12, 1):
+    for i in range(1, 2, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
-        for shrink in range(10, 27, 2):
-            for offset in range(4, 17, 2):
-                for rotation in [270, 340, 20, 90]:
+        for shrink in range(14, 15, 2):
+            for offset in range(6, 7, 2):
+                for rotation in [0]:
                     format_data_file("original_data/UJIpenchars-w%02d" % i,
                                      "%s/char-%02d" % (GROUND_TRUTH_DIR, i) + "-%03d-" + "s%02d-o%02d-r%03d.txt" % (
                                          shrink, offset, rotation),

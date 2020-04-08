@@ -91,7 +91,7 @@ def create_model():
 
 
 def learning_rate_scheduler(epoch, lr):
-    if epoch > 50:
+    if epoch > 10:
         lr = 0.00001
     return lr
 

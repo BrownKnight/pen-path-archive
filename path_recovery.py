@@ -10,7 +10,6 @@ Runs the whole path recovery program by executing the following steps:
 from pathlib import Path
 
 from matplotlib import pyplot as plt
-from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 import cv2
 import sys
@@ -20,7 +19,7 @@ import image_data_utils
 import image_processing.main as image_processing
 import neural_network.network as neural_network
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12300e.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12510i.h5"
 
 
 def main(model, image_path, working_directory):
@@ -58,8 +57,8 @@ def main(model, image_path, working_directory):
     fig.suptitle(image_input_path)
     fig.tight_layout()
 
-    plt.show()
     plt.savefig(analysis_image_output)
+    plt.show()
 
 
 def create_dirs(working_directory):
@@ -87,6 +86,7 @@ if __name__ == "__main__":
 
     print("Loading model")
     lstm_model = neural_network.load_model(MODEL_PATH)
+    print(lstm_model.summary())
 
     if len(args) == 3:
         mode = args[1]
