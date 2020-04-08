@@ -6,10 +6,10 @@ from imutils import resize
 from pathlib import Path
 
 from character import Character
-from data_handler import write_chars_to_file
+from data_handler import write_char_to_file
 from globals import SHOW_STEPS
 from edges import extract_edges
-from skeleton import get_skeletons
+from skeleton import get_skeleton
 
 
 def main(input_path, output_path):
@@ -19,7 +19,7 @@ def main(input_path, output_path):
     The pipeline consists of the following steps
     - Process image (resize, blur etc)
     - Skeletonize image to create single-pixel-width edges
-    - Extract edge paths for each non-intersecting edge of each letter
+    - Extract edge paths for each edge of each letter, where the resultant edges have no intersections
     - Output all the data
     """
     img = cv2.imread(input_path, 0)
@@ -45,7 +45,7 @@ def main(input_path, output_path):
     character.add_to_progress_image(threshold_image, "Threshold")
 
     # Process the image to get the endpoints and skeletons for each letter
-    success = get_skeletons(character)
+    success = get_skeleton(character)
     if not success:
         print("Could not get skeleton for %s" % input_path)
 
@@ -56,8 +56,7 @@ def main(input_path, output_path):
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
-    # TODO Write out each character to image_output folders, for use in the neural network
-    write_chars_to_file(character, output_path)
+    write_char_to_file(character, output_path)
 
 
 def run(mode):

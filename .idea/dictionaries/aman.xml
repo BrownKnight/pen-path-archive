@@ -2,9 +2,11 @@
   <dictionary name="aman">
     <words>
       <w>jointpoints</w>
+      <w>keypoints</w>
       <w>pathing</w>
       <w>pytesseract</w>
       <w>relu</w>
+      <w>skeletonised</w>
       <w>skeletonize</w>
       <w>skeletonized</w>
     </words>

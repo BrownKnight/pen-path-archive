@@ -133,8 +133,8 @@ def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarr
     np.savetxt("test.nosync/result.txt", result)
     result_image = create_image_from_data(result)
 
-    test = test_data[0] * 63
-    test_image = create_image_from_data(test)
+    test_data = test_data[0] * 63
+    test_image = create_image_from_data(test_data)
 
     ground_truth = ground_truth[data_index] * 63
     ground_truth = create_image_from_data(ground_truth)

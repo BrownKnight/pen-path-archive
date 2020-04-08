@@ -29,17 +29,13 @@ def format_data_file(data_path, data_output_path, char_shrink, offset, rotation)
 
         char = []
         for line in lines:
-            # Lines are written in the format (x,y,point_type,time_step)
-            # Where point_type is 1=normal, 2=stroke_startpoint, 3=stroke_endpoint
             if "SEGMENT" in line:
                 if char:
                     chars.append(char)
                 char = []
             else:
                 x, y = line.strip("\n", ).strip(" ").replace("   ", " ").replace("  ", " ").split(" ")
-                # point_type = 2 if mark_as_pen_down else 1
-                # mark_as_pen_down = False
-                # Divide each coordinate by a given constant to reduce the size of the character
+                # Divide each coordinate by a given shrink constant to scale the size of the character
                 char.append((int(int(x) / char_shrink), int(int(y) / char_shrink)))
 
     for index, char in enumerate(chars):

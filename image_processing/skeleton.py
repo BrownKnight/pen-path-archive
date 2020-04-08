@@ -6,10 +6,10 @@ from imutils.contours import sort_contours
 from skimage.morphology import skeletonize
 
 from character import Character
-from globals import SHOW_STEPS, WAIT_TIME
+from globals import SHOW_STEPS
 
 
-def get_skeletons(char: Character):
+def get_skeleton(char: Character):
     # Skeletonize the shapes
     # Skimage function takes image with either True, False or 0,1
     # and returns and image with values 0, 1.
@@ -75,9 +75,6 @@ def skeleton_jointpoints(skel):
     # cv2.imshow('filtered', filtered)
     # cv2.waitKey(0)
 
-    # now look through to find the value greater than or equal to 17 (i.e has at least 3 neighbouring pixels,
-    # and at least 2 of them are in the horizontal/vertical direction
-    # this returns a mask of the jointpoints
     rows, cols = np.where(filtered == 19)
     coords = list(zip(cols, rows))
 
