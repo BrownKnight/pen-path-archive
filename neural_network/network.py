@@ -102,7 +102,7 @@ def train_model(model: models.Sequential, train_x: np.ndarray, train_y: np.ndarr
                                  save_best_only=True, mode='auto', period=2)
     lr_scheduler = LearningRateScheduler(learning_rate_scheduler, verbose=1)
 
-    history = model.fit([train_x, train_x], train_y, batch_size=160, epochs=50, verbose=1, validation_split=TEST_SPLIT,
+    history = model.fit([train_x, train_x], train_y, batch_size=256, epochs=50, verbose=1, validation_split=TEST_SPLIT,
                         shuffle=True, callbacks=[checkpoint, lr_scheduler])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
@@ -133,8 +133,8 @@ def test(model: models.Sequential, test_data: np.ndarray, ground_truth: np.ndarr
     np.savetxt("test.nosync/result.txt", result)
     result_image = create_image_from_data(result)
 
-    test = test_data[0] * 63
-    test_image = create_image_from_data(test)
+    test_data = test_data[0] * 63
+    test_image = create_image_from_data(test_data)
 
     ground_truth = ground_truth[data_index] * 63
     ground_truth = create_image_from_data(ground_truth)

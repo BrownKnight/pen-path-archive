@@ -11,7 +11,7 @@ import numpy as np
 from character import Character
 
 
-def write_chars_to_file(char: Character, output_path):
+def write_char_to_file(char: Character, output_path):
     if not char.usable:
         return
 

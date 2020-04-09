@@ -19,7 +19,7 @@ import image_data_utils
 import image_processing.main as image_processing
 import neural_network.network as neural_network
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12510i.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12550j.h5"
 
 
 def main(model, image_path, working_directory):
@@ -116,5 +116,5 @@ if __name__ == "__main__":
 
     else:
         input_path = Path("test/image_input/e.tif")
-        main(input_path, input_path.parent.parent)
+        main(lstm_model, input_path, input_path.parent.parent)
 
