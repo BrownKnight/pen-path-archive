@@ -62,7 +62,6 @@ def format_data_file(data_path, data_output_path, char_shrink, offset, rotation)
                 file.writelines(["%s,%s\n" % tuple(point) for point in padded_points])
 
 
-
 def rotate_coords(x, y, rotation):
     angle = math.radians(rotation)
 
@@ -101,9 +100,9 @@ def main():
     for i in range(1, 2, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
-        for shrink in range(14, 15, 2):
-            for offset in range(6, 7, 2):
-                for rotation in [0]:
+        for shrink in range(11, 24, 2):
+            for offset in range(5, 18, 2):
+                for rotation in [330, 345, 15, 30]:
                     format_data_file("original_data/UJIpenchars-w%02d" % i,
                                      "%s/char-%02d" % (GROUND_TRUTH_DIR, i) + "-%03d-" + "s%02d-o%02d-r%03d.txt" % (
                                          shrink, offset, rotation),
