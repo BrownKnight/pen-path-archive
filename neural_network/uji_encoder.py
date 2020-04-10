@@ -97,7 +97,7 @@ def main():
     Path(IMAGE_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
     # Create multiple iterations of all 11 data files with various levels of char_shrink and offset
-    for i in range(1, 2, 1):
+    for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
         for shrink in range(11, 24, 2):
