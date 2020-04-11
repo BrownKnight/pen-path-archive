@@ -2,6 +2,9 @@
 To run this file, use no arguments for default parameters, or use the following syntax
 python3 path_recovery.py <mode:single|directory> <input_image_path>
 
+Input images should be in the test/image_input directory. They should be 64x64 images with .tif file type
+Running image_processing/separate_chars.py will take input from test/multi_char and output to test/image_input
+
 Runs the whole path recovery program by executing the following steps:
 - Load the image to be analysed
 - Run the image_processing package against it
@@ -32,6 +35,8 @@ def main(model, image_path, working_directory):
     prediction_image_output = "%s/prediction_image/%s.tiff" % (working_directory, file_name)
     prediction_path_output = "%s/prediction_path/%s.csv" % (working_directory, file_name)
     analysis_image_output = "%s/analysis_image/%s.tiff" % (working_directory, file_name)
+    adopted_path_output = "%s/adopted_path/%s.csv" % (working_directory, file_name)
+    adopted_image_output = "%s/adopted_image/%s.tiff" % (working_directory, file_name)
 
     # Extract undirected edges from the image
     print("Extracting edges from image")
@@ -53,6 +58,9 @@ def main(model, image_path, working_directory):
     print("Adopting path to sequence")
     adopted_path = adopt_path_shape(input_image_data[0], predicted_path)
     adopted_image = image_data_utils.create_image_from_data(adopted_path)
+    np.savetxt(adopted_path_output, adopted_path.astype(np.uint8), delimiter=",", fmt="%d")
+
+    cv2.imwrite(adopted_image_output, adopted_image.astype(np.uint8))
 
     # Display the images for visual evaluation
     fig: Figure
@@ -83,11 +91,15 @@ def create_dirs(working_directory):
     prediction_image_output = "%s/prediction_image" % working_directory
     prediction_path_output = "%s/prediction_path" % working_directory
     analysis_image_output = "%s/analysis_image" % working_directory
+    adopted_image_output = "%s/adopted_image" % working_directory
+    adopted_path_output = "%s/adopted_path" % working_directory
     # Create the directories if they don't already exist
     Path(image_output_path).mkdir(parents=True, exist_ok=True)
     Path(prediction_image_output).mkdir(parents=True, exist_ok=True)
     Path(prediction_path_output).mkdir(parents=True, exist_ok=True)
     Path(analysis_image_output).mkdir(parents=True, exist_ok=True)
+    Path(adopted_image_output).mkdir(parents=True, exist_ok=True)
+    Path(adopted_path_output).mkdir(parents=True, exist_ok=True)
 
     # Print some information about this run
     print("Using Model: %s" % MODEL_PATH)
@@ -95,6 +107,7 @@ def create_dirs(working_directory):
     print("Prediction Output Path: %s" % prediction_image_output)
     print("Prediction Path Output Path: %s" % prediction_path_output)
     print("Analysis Output Path: %s" % analysis_image_output)
+    print("Adopted Image Output Path: %s" % adopted_image_output)
 
 
 if __name__ == "__main__":
