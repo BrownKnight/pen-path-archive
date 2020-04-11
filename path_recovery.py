@@ -11,15 +11,17 @@ from pathlib import Path
 
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import cv2
 import sys
 import numpy as np
 
 import image_data_utils
 import image_processing.main as image_processing
+from image_processing.adopt_path_shape import adopt_path_shape
 import neural_network.network as neural_network
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12550j.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12800n.h5"
 
 
 def main(model, image_path, working_directory):
@@ -46,14 +48,26 @@ def main(model, image_path, working_directory):
     predicted_image = image_data_utils.create_image_from_data(predicted_path)
     cv2.imwrite(prediction_image_output, predicted_image.astype(np.uint8))
 
+    print("Adopting path to sequence")
+    adopted_path = adopt_path_shape(input_image_data[0], predicted_path)
+    adopted_image = image_data_utils.create_image_from_data(adopted_path)
+
     # Display the images for visual evaluation
     fig: Figure
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    ax1: Axes
+    ax2: Axes
+    ax3: Axes
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
     colorbar1 = ax1.imshow(image_data_utils.create_image_from_data(input_image_data[0]))
+    ax1.set_title("Edges extracted from Input")
     colorbar2 = ax2.imshow(predicted_image)
+    ax2.set_title("Predicted Path")
+    colorbar3 = ax3.imshow(adopted_image)
+    ax3.set_title("Input Shape Adopted Path")
 
     fig.colorbar(colorbar1, ax=ax1)
     fig.colorbar(colorbar2, ax=ax2)
+    fig.colorbar(colorbar3, ax=ax3)
     fig.suptitle(image_input_path)
     fig.tight_layout()
 
