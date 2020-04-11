@@ -48,6 +48,7 @@ def main(input_path, output_path):
     success = get_skeleton(character)
     if not success:
         print("Could not get skeleton for %s" % input_path)
+        return False
 
     character.edges = extract_edges(character)
 
@@ -57,6 +58,7 @@ def main(input_path, output_path):
         cv2.waitKey(1)
 
     write_char_to_file(character, output_path)
+    return True
 
 
 def run(mode):

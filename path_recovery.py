@@ -35,7 +35,9 @@ def main(model, image_path, working_directory):
 
     # Extract undirected edges from the image
     print("Extracting edges from image")
-    image_processing.main(image_input_path, image_output_path)
+    success = image_processing.main(image_input_path, image_output_path)
+    if not success:
+        return
 
     # Run the undirected image through the neural network to extract pen path
     print("Running edges through Neural Network")

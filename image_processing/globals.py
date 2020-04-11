@@ -1,2 +1,2 @@
 SHOW_STEPS = False
-WAIT_TIME = 1
+WAIT_TIME = 0
