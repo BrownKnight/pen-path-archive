@@ -51,6 +51,9 @@ def main(input_path, output_path):
         return False
 
     character.edges = extract_edges(character)
+    if len(character.edges) == 0:
+        print("Could not extract edges for %s" % input_path)
+        return False
 
     if SHOW_STEPS:
         cv2.waitKey(1000000)

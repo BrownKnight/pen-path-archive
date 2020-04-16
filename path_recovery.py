@@ -24,7 +24,7 @@ import image_processing.main as image_processing
 from image_processing.adopt_path_shape import adopt_path_shape
 import neural_network.network as neural_network
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_12900o.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13000p.h5"
 
 
 def main(model, image_path, working_directory):
@@ -78,7 +78,7 @@ def main(model, image_path, working_directory):
     fig.colorbar(colorbar1, ax=ax1)
     fig.colorbar(colorbar2, ax=ax2)
     fig.colorbar(colorbar3, ax=ax3)
-    fig.suptitle(image_input_path)
+    fig.suptitle(file_name)
     fig.tight_layout()
 
     plt.savefig(analysis_image_output)

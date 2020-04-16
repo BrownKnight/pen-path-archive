@@ -1,6 +1,7 @@
 import glob
 
 import numpy as np
+import cv2
 
 
 def load_y(path):
@@ -65,3 +66,19 @@ def create_image_from_data(data: np.ndarray):
             image[y, x] = i + 1
 
     return image
+
+
+def load_rgb_images(file_paths):
+    images = np.empty((len(file_paths), 64, 64, 3), dtype=np.uint8)
+    for index, file_path in enumerate(file_paths):
+        images[index] = cv2.imread(file_path)
+
+    return images
+
+
+def load_greyscale_images(file_paths):
+    images = np.empty((len(file_paths), 64, 64), dtype=np.uint8)
+    for index, file_path in enumerate(file_paths):
+        images[index] = cv2.imread(file_path, 0)
+
+    return images

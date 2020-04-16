@@ -153,4 +153,4 @@ def merge_boxes(box1, box2):
 
 
 if __name__ == '__main__':
-    get_bounding_boxes("test/multi_char/all_chars.jpeg", "test/image_input")
+    get_bounding_boxes("test/multi_char/all-chars.jpeg", "test/image_input")
