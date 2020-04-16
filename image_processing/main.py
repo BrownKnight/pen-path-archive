@@ -67,8 +67,8 @@ def main(input_path, output_path):
 def run(mode):
     if mode == 'single':
         print("Operating in single file mode")
-        input_path = "test/d.tiff"
-        output_path = "test/d.csv"
+        input_path = "test/image_input/char-029.tif"
+        output_path = "test/image_output/char-029.csv"
         print("Reading image from %s" % input_path)
         print("Outputting image data to %s" % output_path)
 

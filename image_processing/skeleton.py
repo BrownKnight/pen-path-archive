@@ -28,6 +28,9 @@ def get_skeleton(char: Character):
     if SHOW_STEPS:
         print("Found %s contours" % len(contours))
 
+    if len(contours) == 0:
+        return False
+
     for contour in contours:
         if cv2.arcLength(contour, True) > 40:
             # Take the coordinates of the skeleton points
@@ -54,8 +57,6 @@ def get_skeleton(char: Character):
             char.add_to_progress_image(char.image, "skeletonized")
             char.add_to_progress_image(visualisation_image, "key points")
 
-        else:
-            return False
     return True
 
 

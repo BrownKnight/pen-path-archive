@@ -14,16 +14,24 @@ from character import Character
 def write_char_to_file(char: Character, output_path):
     if not char.usable:
         return
-
+    all_edge_points = np.concatenate(char.edges)
+    length_of_all_points = len(all_edge_points)
+    edges_to_concat = []
     for i in range(len(char.edges)):
         # We want the number of points to be as close to 128 as possible, with a bit of margin
-        if len(char.edges[i]) > 384:
-            char.edges[i] = char.edges[i][::3]
+        if length_of_all_points > 250:
+            edges_to_concat.append(char.edges[i][::3])
+            # Make sure the last point of every edge is still included, as its likely a key point
+            if edges_to_concat[-1] != char.edges[i][-1]:
+                edges_to_concat[i].append(char.edges[i][-1])
         else:
-            char.edges[i] = char.edges[i][::2]
+            edges_to_concat.append(char.edges[i][::2])
+            if edges_to_concat[-1] != char.edges[i][-1]:
+                edges_to_concat[i].append(char.edges[i][-1])
 
 
-    all_edge_points = np.concatenate(char.edges)
+
+    all_edge_points = np.concatenate(edges_to_concat)
     padded_edge_points = np.zeros((128, 3), np.uint8)
     padded_edge_points[:all_edge_points.shape[0]] = all_edge_points[:128]
 
