@@ -21,7 +21,7 @@ class Character:
     def add_to_progress_image(self, img_to_add, caption):
         if SHOW_STEPS:
             img = img_to_add.copy()
-            cv2.putText(img, caption, (0,0), cv2.FONT_HERSHEY_PLAIN, 0.5, 255, 1, bottomLeftOrigin=True)
+            # cv2.putText(img, caption, (0,0), cv2.FONT_HERSHEY_PLAIN, 0.5, 255, 1, bottomLeftOrigin=True)
             self.progress_image = np.hstack((self.progress_image, img))
 
             cv2.imshow("progress", self.progress_image)

@@ -45,13 +45,23 @@ def normalize_x(data):
 
 def create_image_from_data(data: np.ndarray):
     image = np.zeros((64, 64), float)
-    for i, point in enumerate(data):
-        x = int(point[0])
-        y = int(point[1])
+    data = data.astype(np.uint8)
+    if data.shape[1] == 3:
+        for point in data:
+            x, y, t = point
 
-        if x <= 1 and y <= 1:
-            continue
+            if x <= 1 and y <= 1:
+                continue
 
-        image[y, x] = i + 1
+            image[y, x] = t + 1
+    else:
+        for i, point in enumerate(data):
+            x = int(point[0])
+            y = int(point[1])
+
+            if x <= 1 and y <= 1:
+                continue
+
+            image[y, x] = i + 1
 
     return image

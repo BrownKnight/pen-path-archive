@@ -21,7 +21,7 @@ def get_bounding_boxes(image_path, output_dir):
     multi_char_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     if SHOW_STEPS:
-        cv2.namedWindow("Process", cv2.WINDOW_NORMAL | cv2.WINDOW_GUI_NORMAL | cv2.WINDOW_FREERATIO)
+        cv2.namedWindow("Process", cv2.WINDOW_NORMAL | cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_FREERATIO)
         cv2.imshow("Process", multi_char_image)
         cv2.waitKey(WAIT_TIME)
 

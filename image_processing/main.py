@@ -34,7 +34,7 @@ def main(input_path, output_path):
     character = Character()
     character.progress_image = img
     if SHOW_STEPS:
-        cv2.namedWindow("progress", flags=cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+        cv2.namedWindow("progress", flags=cv2.WINDOW_NORMAL | cv2.WINDOW_GUI_EXPANDED | cv2.WINDOW_FREERATIO)
 
     # Preprocessing to get the shapes
     threshold_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
