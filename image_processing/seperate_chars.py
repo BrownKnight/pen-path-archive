@@ -1,13 +1,17 @@
 """
 When using the system, it can often be easier to input an image with multiple characters on to get paths for each
-character. TO do this, before processing any characters we should first look at the image create a new image for each
+character. To do this, before processing any characters we should first look at the image create a new image for each
 character.
 
 This is done by:
 Pre-processing the image (blur, threshold)
 Extracting contours from the image
 taking the bounding box of each contour
+
+Syntax: python3 image_processing/seperate_chars <input_file_path> <output_directory>
 """
+import sys
+
 import numpy as np
 import cv2
 from imutils.contours import sort_contours
@@ -153,4 +157,10 @@ def merge_boxes(box1, box2):
 
 
 if __name__ == '__main__':
-    get_bounding_boxes("test/multi_char/all-chars.jpeg", "test/image_input")
+    if len(sys.argv) == 3:
+        input_file = sys.argv[1]
+        output_directory = sys.argv[2]
+        get_bounding_boxes(input_file, output_directory)
+    else:
+        print("No/incorrect number of parameters supplied, running with default values")
+        get_bounding_boxes("test/multi_char/all-chars.jpeg", "test/image_input")

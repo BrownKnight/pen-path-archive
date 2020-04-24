@@ -24,7 +24,7 @@ import image_processing.main as image_processing
 from image_processing.adopt_path_shape import adopt_path_shape
 import neural_network.network as neural_network
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13000p.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13100q.h5"
 
 
 def main(model, image_path, working_directory):

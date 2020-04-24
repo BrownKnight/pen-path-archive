@@ -28,7 +28,7 @@ def process_image_input(image_path):
     if images.shape[0] <= 36:
         fig: Figure
         axes: [Axes]
-        fig, axes = plt.subplots(6, 6, figsize=(12, 12))
+        fig, axes = plt.subplots(6, 6, figsize=(18, 18))
         plt.tight_layout(pad=0.5, h_pad=0, w_pad=0)
         for index, image in enumerate(images):
             axes[floor(index/6), index % 6].imshow(image)
@@ -47,7 +47,7 @@ def process_greyscale_image(image_path):
     if images.shape[0] <= 36:
         fig: Figure
         # plt.tight_layout(pad=0.5, h_pad=0, w_pad=0)
-        fig = plt.figure(figsize=(13, 12))
+        fig = plt.figure(figsize=(18.5, 18))
 
         grid = ImageGrid(fig, 111,  # as in plt.subplot(111)
                          nrows_ncols=(6, 6),
