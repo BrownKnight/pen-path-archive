@@ -59,16 +59,13 @@ def main(input_path, output_path):
         cv2.waitKey(1000000)
         cv2.destroyAllWindows()
         cv2.waitKey(1)
-
     write_char_to_file(character, output_path)
     return True
 
 
-def run(mode):
+def run(mode, input_path, output_path):
     if mode == 'single':
         print("Operating in single file mode")
-        input_path = "test/image_input/char-029.tif"
-        output_path = "test/image_output/char-029.csv"
         print("Reading image from %s" % input_path)
         print("Outputting image data to %s" % output_path)
 
@@ -88,7 +85,11 @@ def run(mode):
 if __name__ == "__main__":
     args = sys.argv
     run_mode = ""
-    if len(args) == 2:
+    if len(args) == 4:
         run_mode = args[1]
+        input_path_arg = args[2]
+        output_path_arg = args[3]
+        run(run_mode, input_path_arg, output_path_arg)
+    else:
+        exit("Incorrect number of parameters supplied. Required syntax: python3 main.py <mode:single|directory> <input_path> <output_path>")
 
-    run(run_mode)

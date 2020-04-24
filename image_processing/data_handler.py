@@ -13,6 +13,7 @@ from character import Character
 
 def write_char_to_file(char: Character, output_path):
     if not char.usable:
+        print("Character path is not usable")
         return
     all_edge_points = np.concatenate(char.edges)
     length_of_all_points = len(all_edge_points)
@@ -28,8 +29,6 @@ def write_char_to_file(char: Character, output_path):
             edges_to_concat.append(char.edges[i][::2])
             if edges_to_concat[-1] != char.edges[i][-1]:
                 edges_to_concat[i].append(char.edges[i][-1])
-
-
 
     all_edge_points = np.concatenate(edges_to_concat)
     padded_edge_points = np.zeros((128, 3), np.uint8)
