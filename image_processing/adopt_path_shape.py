@@ -9,26 +9,30 @@ from math import sqrt
 
 
 def adopt_path_shape(character_path: np.ndarray, timed_sequence: np.ndarray):
-    timed_sequence = timed_sequence.copy()
-    for index, timestep in enumerate(timed_sequence):
-        tx, ty = timestep
-        if tx < 1 and ty < 1:
+    new_sequence = []
+    for index, character_point in enumerate(character_path):
+        cx, cy, _ = character_point
+        if cx < 1 and cy < 1:
             continue
-        timed_sequence[index] = find_closest_point(timestep, character_path)
+        new_timestep =  find_closest_point(character_point, timed_sequence)
+        new_sequence.append(np.asarray((cx, cy, new_timestep)))
+    new_sequence = np.asarray(new_sequence)
+    new_sequence = new_sequence[new_sequence[:,2].argsort()]
+    new_sequence = new_sequence[:, :2]
 
-    return timed_sequence
+    return new_sequence
 
-def find_closest_point(timestep, character_path):
-    px, py = timestep
-    closest_timestep = (0, 0)
+def find_closest_point(character_path, timed_sequence):
+    px, py, _ = character_path
+    closest_timestep = 999
     closest_distance = 99999
 
-    for (x, y, _) in character_path:
+    for timestep, (x, y) in enumerate(timed_sequence):
         if x < 1 and y < 1:
             continue
         distance = sqrt(abs(px - x) + abs(py - y))
         if distance < closest_distance:
             closest_distance = distance
-            closest_timestep = (x, y)
+            closest_timestep = timestep
 
     return closest_timestep
