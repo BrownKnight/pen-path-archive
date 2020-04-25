@@ -5,6 +5,11 @@ from pathlib import Path
 import numpy as np
 from cv2 import cv2
 
+ROTATION_LIST = [345, 0, 15, 30]
+OFFSET_LIST = range(4, 20, 3)
+SCALING_FACTOR_LIST = range(10, 26, 3)
+
+
 IMAGE_INPUT_DIR = "test.nosync/image_input"
 IMAGE_OUTPUT_DIR = "test.nosync/image_output"
 GROUND_TRUTH_DIR = "test.nosync/ground_truth"
@@ -100,9 +105,9 @@ def main():
     for i in range(1, 12, 1):
         print("Creating ground truth files for #%s" % i)
         # Generate all the different ground truth files for this data file
-        for shrink in range(10, 26, 3):
-            for offset in range(4, 20, 3):
-                for rotation in [345, 0, 15, 30]:
+        for shrink in SCALING_FACTOR_LIST:
+            for offset in OFFSET_LIST:
+                for rotation in ROTATION_LIST:
                     format_data_file("original_data/UJIpenchars-w%02d" % i,
                                      "%s/char-%02d" % (GROUND_TRUTH_DIR, i) + "-%03d-" + "s%02d-o%02d-r%03d.txt" % (
                                          shrink, offset, rotation),

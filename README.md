@@ -43,11 +43,11 @@ script. Detailed instructions are below.
    
    ```python3 evaluation.py``` 
    
-   This will seperately compile all images in the `/test/prediction_image`, `/test/adopted_image`, and 
+   This will separately compile all images in the `/test/prediction_image`, `/test/adopted_image`, and 
    `/test/image_input` directories, and create an image with the corresponding name for each directory in the 
    `/test/` directory
    
-For more information on these scripts, see the [Directory/Script Structure](#directory-and-script-structure) section below
+For more information on these scripts, see the [Directory and Script Structure](#directory-and-script-structure) section below
    
 ### Creating your own images
 To evaluate the system against your own handwriting or examples of text, you can simply place an image in the `
@@ -69,11 +69,17 @@ follow the instructions above to extract the pen paths.
 3. Follow steps 3 & 4 in the [Using the Demo Images](#Using-the-demo-images) section to extract edges from these images 
 you have generated
 
+### Using the UJIpenchars Dataset
+This project includes a script in `/neural_network/uji_encoder.py` that can generate training data from the UJIpenchars 
+dataset included in the `/original_data/` directory. Follow the instructions in the 
+[Directory and Script Structure](#directory-and-script-structure) section below to generate this data which you can 
+then use for testing the system.
+
 
 
 
 ## Directory and Script Structure
-### `/path_recovery.py`
+#### `/path_recovery.py`
 
 The main entry point for the whole system. This script will take a single or a directory of input images, extract the 
 undirected edges from them using the `image_processing/main.py` script, then run those edges through the trained model 
@@ -84,7 +90,15 @@ step in detail. The script requires at least one image in the `/test/image_input
 
 Syntax: `python3 path_recovery.py <mode:single|directory> <input_image_path>`
 
-### `/test/*`
+#### `/evaluation.py`
+
+This will separately compile all images in the `/test/prediction_image`, `/test/adopted_image`, and 
+`/test/image_input` directories, and create an image with the corresponding name for each directory in the 
+`/test/` directory. These paths are all hardcoded.
+
+Syntax: `python3 evaluation.py`
+
+#### `/test/*`
 
 This directory is where any files/directories related to the manual running of the system are held. The 
 `path_recovery.py` script will create many directories in here documenting the various steps it takes to produce an 
@@ -103,13 +117,13 @@ This directory is where any files/directories related to the manual running of t
 next to each other to allow for visualisation of the systems output
 
 
-### `/image_processing/*`
+#### `/image_processing/*`
 
 Contains all scripts required to extract undirected edges from an input image. Aside from the `main.py` and 
 `seperate_chars.py` scripts, all the scripts are not intended to be run directly and are simply used to divide up the 
 structure of the program, and are instead called from the `main.py` script.
 
-#### `/image_processing/main.py`
+##### `/image_processing/main.py`
 
 The main entry point for the image processing portion of the system. The script can be run in 2 different modes, 
 `single` where the script only processes a specified file, or `directory` where the script process a whole directory of 
@@ -119,26 +133,26 @@ Run with three parameters depending on situation
 `python3 image_processing/main.py <mode:single|directory> <input_path> <output_path>` 
 Where the input_path and output_path are paths to a file or a directory depending on what mode the script is run in.
 
-#### `/image_processing/seperate_chars.py`
+##### `/image_processing/seperate_chars.py`
 
 This script uses OpenCVs contours and bounding boxes to create a new 64x64px image for every character in the image 
 supplied to it.
 
 Syntax: `python3 image_processing/seperate_chars <input_file_path> <output_directory>`
 
-#### `/image_processing/globals.py`
+##### `/image_processing/globals.py`
 
 This script contains just two variables which are used in various `image_processing` scripts. If `SHOW_STEPS` is set to
  True, throughout the various processing steps a OpenCV window will open showing the progress of the script, and the 
  various steps it is taking. Each step progresses after the `WAIT_TIME` time has passed (in milliseconds). If 
  `WAIT_TIME` is set to zero, the script only processes onto the next step after any keyboard input.
 
-### `/neural_network/*`
+#### `/neural_network/*`
 
 This directory contains all the scripts required to both train and use the neural network including creating the 
 training data.
 
-### `/neural_network/network.py`
+#### `/neural_network/network.py`
 
 The main entry point for using the neural network. Intended to be used from another script if predicting but can be 
 called directly for training. All training data must be in the `/test.nosync/` directory. This directory should contain
@@ -147,15 +161,18 @@ edge output from the image_processing scripts
 
 Syntax: `python3 neural_network/network.py`
 
-### `/neural_network/uji_encoder.py`
+#### `/neural_network/uji_encoder.py`
 
 Using the UJIpenchars dataset in the `/orignal_data/` directory, this script creates the training data for the neural 
-network. It also employs some data augmentation techniques to create up to 200x the samples from the orignal dataset, 
+network. It also employs some data augmentation techniques to create up to 200x the samples from the original dataset, 
 by using various scaling, offset and rotation factors. It will populate the `/test.nosync/image_input` and 
 `/test.nosync/ground_truth` directories. The `image_processing/main.py` script should be run on the 
 `/test.nosync/image_input` directory to populate the `/test.nosync/image_output` directory required for training.
 
-### `neural_network/filter_gt_files.py`
+To change the number of samples generates by the script, simply change the `SCALING_FACTOR_LIST`, `OFFSET_LIST`, and 
+`ROTATION_LIST` constants at the top of the script.
+
+#### `/neural_network/filter_gt_files.py`
 
 This script is run when the `/image_processing/main.py` script is not able to extract edges for every file in the 
 `/test.nosync/image_input` directory. It will remove any character from the `/test.nosync/ground_truth` directory that 
