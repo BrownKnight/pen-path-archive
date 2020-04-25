@@ -47,6 +47,8 @@ script. Detailed instructions are below.
    `/test/image_input` directories, and create an image with the corresponding name for each directory in the 
    `/test/` directory
    
+For more information on these scripts, see the [Directory/Script Structure](#directory-and-script-structure) section below
+   
 ### Creating your own images
 To evaluate the system against your own handwriting or examples of text, you can simply place an image in the `
 /test/multi_char/` directory, then run the `/image_processing/seperate_chars.py` script to extract each character out 
@@ -64,12 +66,13 @@ follow the instructions above to extract the pen paths.
     the `<input_image_path>` and `output_directory` parameters can be omitted, in which case the default values 
     `test/multi_char/all-chars.jpeg` and `test/image_input` will be used respectively
 
-3. Follow steps 3 & 4 in the "Using the Demo Images" section to extract edges from these images
+3. Follow steps 3 & 4 in the [Using the Demo Images](#Using-the-demo-images) section to extract edges from these images 
+you have generated
 
 
 
 
-## Directory/Script Structure
+## Directory and Script Structure
 ### `/path_recovery.py`
 
 The main entry point for the whole system. This script will take a single or a directory of input images, extract the 
