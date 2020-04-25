@@ -1,5 +1,73 @@
 # pen-path
-Digital pen Path Recovery From Handwriting
+Digital Pen Path Recovery From Handwriting
+
+The system approaches the problem of extracting pen paths from images of handwritten text using a hybrid approach 
+consisting of both classical image processing techniques, and Deep Neural Networks.
+
+The result of this is a system that can take an image of a set of or a single character, and output a directed list of 
+points representing the path the pen likely took to draw the character,
+
+## Setup
+This is built against Python 3.7. It is recommended to use a venv when running this script for ease of use.
+The following packages are dependencies for this project:
+- NumPy
+- MatPlotLib
+- SciKit-Image
+- TensorFlow 2.x
+- opencv-python (OpenCV2)
+- imutils
+
+
+
+
+## Testing/Evaluation the System
+### Using the demo images
+For the purposes of testing the system and the models, there is a collection of images supplied in the `/demo/` 
+directory which can be copied into the `/test/image_input/` directory to allow you to run the `path_recovery.py` 
+script. Detailed instructions are below.
+
+1. Empty the `/test/` directory to ensure there are no extraneous results from previous runs. Create this directory if 
+    it does not exist already
+
+2. Choose a set of input images from the `/demo/*` directory, and copy them into the a `/test/image_input` directory
+
+3. Run the `/path_recovery.py` script with the parameters `directory test/image_input`
+
+    ```python3 path_recovery.py directory test/image_input```
+    
+    This will create many new directories in the `/test/` directory, showing each step the system took to produce the 
+    output.
+
+4. To help with visualising the results, you may run the `/evaluation.py` script to produce a board of images to allow 
+    for easier direct comparison
+   
+   ```python3 evaluation.py``` 
+   
+   This will seperately compile all images in the `/test/prediction_image`, `/test/adopted_image`, and 
+   `/test/image_input` directories, and create an image with the corresponding name for each directory in the 
+   `/test/` directory
+   
+### Creating your own images
+To evaluate the system against your own handwriting or examples of text, you can simply place an image in the `
+/test/multi_char/` directory, then run the `/image_processing/seperate_chars.py` script to extract each character out 
+from the image, and create individual character image files in the `/test/image_input/` directory. Then you can simply 
+follow the instructions above to extract the pen paths. 
+
+1. Create the `/test/multi_char` directory and place your image containing multiple characters in it.
+
+2. Run the `/image_processing/seperate_chars.py` script to generate the individual character images.
+    
+    ```python3 image_processing/seperate_chars.py <input_image_path> <output_directory>```
+    
+    e.g. ```python3 image_processing/seperate_chars.py test/multi_char/all-chars.jpeg test/image_input```
+    
+    the `<input_image_path>` and `output_directory` parameters can be omitted, in which case the default values 
+    `test/multi_char/all-chars.jpeg` and `test/image_input` will be used respectively
+
+3. Follow steps 3 & 4 in the "Using the Demo Images" section to extract edges from these images
+
+
+
 
 ## Directory/Script Structure
 ### `/path_recovery.py`
@@ -52,8 +120,15 @@ Where the input_path and output_path are paths to a file or a directory dependin
 
 This script uses OpenCVs contours and bounding boxes to create a new 64x64px image for every character in the image 
 supplied to it.
-
+
 Syntax: `python3 image_processing/seperate_chars <input_file_path> <output_directory>`
+
+#### `/image_processing/globals.py`
+
+This script contains just two variables which are used in various `image_processing` scripts. If `SHOW_STEPS` is set to
+ True, throughout the various processing steps a OpenCV window will open showing the progress of the script, and the 
+ various steps it is taking. Each step progresses after the `WAIT_TIME` time has passed (in milliseconds). If 
+ `WAIT_TIME` is set to zero, the script only processes onto the next step after any keyboard input.
 
 ### `/neural_network/*`
 
