@@ -137,8 +137,11 @@ Where the input_path and output_path are paths to a file or a directory dependin
 
 This script uses OpenCVs contours and bounding boxes to create a new 64x64px image for every character in the image 
 supplied to it.
-
+
 Syntax: `python3 image_processing/seperate_chars <input_file_path> <output_directory>`
+
+The `<input_image_path>` and `output_directory` parameters can be omitted, in which case the default values 
+`test/multi_char/all-chars.jpeg` and `test/image_input` will be used respectively
 
 ##### `/image_processing/globals.py`
 
