@@ -3,6 +3,8 @@ from tensorflow_core.python.keras.callbacks import ModelCheckpoint, LearningRate
 from tensorflow_core.python.keras.layers import Input, LSTM, TimeDistributed, Dense, Bidirectional, Concatenate, \
     RepeatVector
 from tensorflow.keras import models, losses, optimizers, activations
+import tensorflow.compat.v1 as tf
+import tensorflow.keras.backend as K
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +12,7 @@ import matplotlib.pyplot as plt
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
 from image_data_utils import load_y, normalize_y, load_x, normalize_x, create_image_from_data
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-training.h5"
+MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13100q.h5"
 # MODEL_PATH = "models/auto_save.h5"
 TEST_SPLIT = 0.1
 
@@ -40,8 +42,24 @@ def main():
     x_data = x_data[randomize]
     y_data = y_data[randomize]
 
+    model: Model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
     # model = create_model()
-    model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
+
+    # Calucation network metrics
+    # session = tf.Session()
+    # graph = tf.get_default_graph()
+    #
+    # with graph.as_default():
+    #     with session.as_default():
+    #         model: Model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
+    #
+    #         run_meta = tf.compat.v1.RunMetadata()
+    #         opts = tf.profiler.ProfileOptionBuilder.float_operation()
+    #
+    #         # We use the Keras session graph in the call to the profiler.
+    #         flops = tf.profiler.profile(graph=graph, run_meta=run_meta, cmd='op', options=opts)
+    # print(flops.total_float_ops)
+
     print(model.summary())
 
     train_model(model, x_data, y_data)
