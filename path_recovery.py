@@ -10,7 +10,9 @@ Runs the whole path recovery program by executing the following steps:
 - Run the image_processing package against it
 - Run the output from image_processing in neural_network
 """
+from datetime import timedelta
 from pathlib import Path
+from timeit import default_timer as timer # Used to measure performance of the system
 
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
@@ -25,6 +27,7 @@ from image_processing.adopt_path_shape import adopt_path_shape
 import neural_network.network as neural_network
 
 MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13100q.h5"
+SAVE_VISUALISATION_IMAGES = False
 
 
 def main(model, image_path, working_directory):
@@ -32,11 +35,12 @@ def main(model, image_path, working_directory):
 
     image_input_path = str(image_path)
     image_output_path = "%s/image_output/%s.csv" % (working_directory, file_name)
-    prediction_image_output = "%s/prediction_image/%s.tiff" % (working_directory, file_name)
-    prediction_path_output = "%s/prediction_path/%s.csv" % (working_directory, file_name)
-    analysis_image_output = "%s/analysis_image/%s.tiff" % (working_directory, file_name)
     adopted_path_output = "%s/adopted_path/%s.csv" % (working_directory, file_name)
     adopted_image_output = "%s/adopted_image/%s.tiff" % (working_directory, file_name)
+    if SAVE_VISUALISATION_IMAGES:
+        prediction_image_output = "%s/prediction_image/%s.tiff" % (working_directory, file_name)
+        prediction_path_output = "%s/prediction_path/%s.csv" % (working_directory, file_name)
+        analysis_image_output = "%s/analysis_image/%s.tiff" % (working_directory, file_name)
 
     # Extract undirected edges from the image
     print("Extracting edges from image")
@@ -49,64 +53,73 @@ def main(model, image_path, working_directory):
     input_image_data = image_data_utils.load_x(image_output_path)
     predicted_path = neural_network.predict(model, input_image_data.copy())
 
-    print("Saving results")
-    # Save the prediction results to various data and image files
-    np.savetxt(prediction_path_output, predicted_path.astype(np.uint8), delimiter=",", fmt="%d")
-    predicted_image = image_data_utils.create_image_from_data(predicted_path)
-    cv2.imwrite(prediction_image_output, predicted_image.astype(np.uint8))
+    if SAVE_VISUALISATION_IMAGES:
+        print("Saving results")
+        # Save the prediction results to various data and image files
+        np.savetxt(prediction_path_output, predicted_path.astype(np.uint8), delimiter=",", fmt="%d")
+        predicted_image = image_data_utils.create_image_from_data(predicted_path)
+        cv2.imwrite(prediction_image_output, predicted_image.astype(np.uint8))
 
-    print("Adopting path to sequence")
+    print("Adopting path to shape of character")
     adopted_path = adopt_path_shape(input_image_data[0], predicted_path)
     adopted_image = image_data_utils.create_image_from_data(adopted_path)
     np.savetxt(adopted_path_output, adopted_path.astype(np.uint8), delimiter=",", fmt="%d")
 
     cv2.imwrite(adopted_image_output, adopted_image.astype(np.uint8))
 
-    # Display the images for visual evaluation
-    fig: Figure
-    ax1: Axes
-    ax2: Axes
-    ax3: Axes
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
-    colorbar1 = ax1.imshow(image_data_utils.create_image_from_data(input_image_data[0]))
-    ax1.set_title("Edges extracted from Input")
-    colorbar2 = ax2.imshow(predicted_image)
-    ax2.set_title("Predicted Path")
-    colorbar3 = ax3.imshow(adopted_image)
-    ax3.set_title("Input Shape Adopted Path")
+    if SAVE_VISUALISATION_IMAGES:
+        # Display the images for visual evaluation
+        fig: Figure
+        ax1: Axes
+        ax2: Axes
+        ax3: Axes
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+        colorbar1 = ax1.imshow(image_data_utils.create_image_from_data(input_image_data[0]))
+        ax1.set_title("Edges extracted from Input")
+        colorbar2 = ax2.imshow(predicted_image)
+        ax2.set_title("Predicted Path")
+        colorbar3 = ax3.imshow(adopted_image)
+        ax3.set_title("Input Shape Adopted Path")
 
-    fig.colorbar(colorbar1, ax=ax1)
-    fig.colorbar(colorbar2, ax=ax2)
-    fig.colorbar(colorbar3, ax=ax3)
-    fig.suptitle(file_name)
-    fig.tight_layout()
+        fig.colorbar(colorbar1, ax=ax1)
+        fig.colorbar(colorbar2, ax=ax2)
+        fig.colorbar(colorbar3, ax=ax3)
+        fig.suptitle(file_name)
+        fig.tight_layout()
 
-    plt.savefig(analysis_image_output)
-    plt.show()
+        plt.savefig(analysis_image_output)
+        plt.show()
 
 
 def create_dirs(working_directory):
     # Input path should be in the format "*/<working_directory>/image_input/<file_name>.tif"
     image_output_path = "%s/image_output" % working_directory
-    prediction_image_output = "%s/prediction_image" % working_directory
-    prediction_path_output = "%s/prediction_path" % working_directory
-    analysis_image_output = "%s/analysis_image" % working_directory
     adopted_image_output = "%s/adopted_image" % working_directory
     adopted_path_output = "%s/adopted_path" % working_directory
+
+    if SAVE_VISUALISATION_IMAGES:
+        prediction_image_output = "%s/prediction_image" % working_directory
+        prediction_path_output = "%s/prediction_path" % working_directory
+        analysis_image_output = "%s/analysis_image" % working_directory
+
     # Create the directories if they don't already exist
     Path(image_output_path).mkdir(parents=True, exist_ok=True)
-    Path(prediction_image_output).mkdir(parents=True, exist_ok=True)
-    Path(prediction_path_output).mkdir(parents=True, exist_ok=True)
-    Path(analysis_image_output).mkdir(parents=True, exist_ok=True)
     Path(adopted_image_output).mkdir(parents=True, exist_ok=True)
     Path(adopted_path_output).mkdir(parents=True, exist_ok=True)
+
+    if SAVE_VISUALISATION_IMAGES:
+        Path(prediction_image_output).mkdir(parents=True, exist_ok=True)
+        Path(prediction_path_output).mkdir(parents=True, exist_ok=True)
+        Path(analysis_image_output).mkdir(parents=True, exist_ok=True)
 
     # Print some information about this run
     print("Using Model: %s" % MODEL_PATH)
     print("Image Output Path: %s" % image_output_path)
-    print("Prediction Output Path: %s" % prediction_image_output)
-    print("Prediction Path Output Path: %s" % prediction_path_output)
-    print("Analysis Output Path: %s" % analysis_image_output)
+    if SAVE_VISUALISATION_IMAGES:
+        print("Prediction Output Path: %s" % prediction_image_output)
+        print("Prediction Path Output Path: %s" % prediction_path_output)
+        print("Analysis Output Path: %s" % analysis_image_output)
+    print("Adopted Path Output Path: %s" % adopted_path_output)
     print("Adopted Image Output Path: %s" % adopted_image_output)
 
 
@@ -116,6 +129,7 @@ if __name__ == "__main__":
     print("Loading model")
     lstm_model = neural_network.load_model(MODEL_PATH)
     print(lstm_model.summary())
+    start_time = timer()
 
     if len(args) == 3:
         mode = args[1]
@@ -136,8 +150,8 @@ if __name__ == "__main__":
             root_dir = path.parent
             create_dirs(root_dir)
 
-            for file in sorted(path.glob("*")):
-                print("------------------Processing file %s------------------" % file)
+            for index, file in enumerate(sorted(path.glob("*"))[:10000]):
+                print("---------Processing file #%d (%s)--------" % (index, file.stem))
                 main(lstm_model, file, root_dir)
 
         else:
@@ -146,4 +160,8 @@ if __name__ == "__main__":
     else:
         input_path = Path("test/image_input/e.tif")
         main(lstm_model, input_path, input_path.parent.parent)
+
+    end_time = timer()
+    elapsed_time = end_time - start_time
+    print("Elapsed time (hh:mm:ss): %s (%.2f seconds)" % (timedelta(seconds=elapsed_time), elapsed_time))
 
