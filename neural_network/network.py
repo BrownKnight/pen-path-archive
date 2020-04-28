@@ -45,7 +45,7 @@ def main():
     model: Model = models.load_model(MODEL_PATH, custom_objects={"capped_relu": capped_relu})
     # model = create_model()
 
-    # Calucation network metrics
+    # # Calculate network complexity metrics
     # session = tf.Session()
     # graph = tf.get_default_graph()
     #
