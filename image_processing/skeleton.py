@@ -5,8 +5,8 @@ import numpy as np
 from imutils.contours import sort_contours
 from skimage.morphology import skeletonize
 
-from character import Character
-from globals import SHOW_STEPS
+from .character import Character
+from .globals import SHOW_STEPS
 
 
 def get_skeleton(char: Character):

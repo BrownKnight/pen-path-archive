@@ -8,7 +8,7 @@ Z Values:
 3: Endpoint
 """
 import numpy as np
-from character import Character
+from .character import Character
 
 
 def write_char_to_file(char: Character, output_path):

@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from character import Character
-from globals import SHOW_STEPS
+from .character import Character
+from .globals import SHOW_STEPS
 
 
 def extract_edges(char: Character):

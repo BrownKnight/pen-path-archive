@@ -1,7 +1,7 @@
 """A class to hold all the required data for each character"""
 import numpy as np
 import cv2
-from globals import WAIT_TIME, SHOW_STEPS
+from .globals import WAIT_TIME, SHOW_STEPS
 
 
 class Character:

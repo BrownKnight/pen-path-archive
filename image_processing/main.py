@@ -5,11 +5,11 @@ import cv2
 from imutils import resize
 from pathlib import Path
 
-from character import Character
-from data_handler import write_char_to_file
-from globals import SHOW_STEPS
-from edges import extract_edges
-from skeleton import get_skeleton
+from .character import Character
+from .data_handler import write_char_to_file
+from .globals import SHOW_STEPS
+from .edges import extract_edges
+from .skeleton import get_skeleton
 
 
 def main(input_path, output_path):

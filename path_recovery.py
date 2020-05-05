@@ -21,12 +21,11 @@ import cv2
 import sys
 import numpy as np
 
-import image_data_utils
 import image_processing.main as image_processing
-from image_processing.adopt_path_shape import adopt_path_shape
-import neural_network.network as neural_network
+from image_processing import adopt_path_shape
+from neural_network import network, image_data_utils
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13100q.h5"
+MODEL_PATH = "models//BiLSTM-S2S.h5"
 SAVE_VISUALISATION_IMAGES = False
 
 
@@ -43,7 +42,7 @@ def main(model, image_path, working_directory):
         analysis_image_output = "%s/analysis_image/%s.tiff" % (working_directory, file_name)
 
     # Extract undirected edges from the image
-    print("Extracting edges from image")
+    print("Extracting edges from image %s" % image_input_path)
     success = image_processing.main(image_input_path, image_output_path)
     if not success:
         return
@@ -51,7 +50,7 @@ def main(model, image_path, working_directory):
     # Run the undirected image through the neural network to extract pen path
     print("Running edges through Neural Network")
     input_image_data = image_data_utils.load_x(image_output_path)
-    predicted_path = neural_network.predict(model, input_image_data.copy())
+    predicted_path = network.predict(model, input_image_data.copy())
 
     if SAVE_VISUALISATION_IMAGES:
         print("Saving results")
@@ -61,7 +60,7 @@ def main(model, image_path, working_directory):
         cv2.imwrite(prediction_image_output, predicted_image.astype(np.uint8))
 
     print("Adopting path to shape of character")
-    adopted_path = adopt_path_shape(input_image_data[0], predicted_path)
+    adopted_path = adopt_path_shape.adopt_path_shape(input_image_data[0], predicted_path)
     adopted_image = image_data_utils.create_image_from_data(adopted_path)
     np.savetxt(adopted_path_output, adopted_path.astype(np.uint8), delimiter=",", fmt="%d")
 
@@ -127,7 +126,7 @@ if __name__ == "__main__":
     args = sys.argv
 
     print("Loading model")
-    lstm_model = neural_network.load_model(MODEL_PATH)
+    lstm_model = network.load_model(MODEL_PATH)
     print(lstm_model.summary())
     start_time = timer()
 
@@ -149,8 +148,8 @@ if __name__ == "__main__":
 
             root_dir = path.parent
             create_dirs(root_dir)
-
-            for index, file in enumerate(sorted(path.glob("*"))[:10000]):
+            file_paths = sorted([path for path in path.glob("*") if not path.stem.startswith(".")])
+            for index, file in enumerate(file_paths[:10000]):
                 print("---------Processing file #%d (%s)--------" % (index, file.stem))
                 main(lstm_model, file, root_dir)
 
@@ -158,8 +157,7 @@ if __name__ == "__main__":
             exit("Other modes not yet supported, only Single or Directory")
 
     else:
-        input_path = Path("test/image_input/e.tif")
-        main(lstm_model, input_path, input_path.parent.parent)
+        exit("Required Syntax: python3 path_recovery.py <mode:single|directory> <input_image_path> For default use python3 path_recovery.py directory test/image_input")
 
     end_time = timer()
     elapsed_time = end_time - start_time
