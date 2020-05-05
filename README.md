@@ -81,6 +81,10 @@ then use for testing the system.
 
 
 ## Directory and Script Structure
+This system makes use of modules that can be run individually if needed, for example to train the network. In order to
+ do this from the command-line, you must run the script as a module to ensure the relative imports still work, for 
+ example to train you should run `python3 -m neural_network.network` instead of the path directly.
+
 #### `/path_recovery.py`
 
 The main entry point for the whole system. This script will take a single or a directory of input images, extract the 
@@ -132,7 +136,7 @@ The main entry point for the image processing portion of the system. The script 
 files.
 
 Run with three parameters depending on situation
-`python3 image_processing/main.py <mode:single|directory> <input_path> <output_path>` 
+`python3 -m image_processing/main <mode:single|directory> <input_path> <output_path>` 
 Where the input_path and output_path are paths to a file or a directory depending on what mode the script is run in.
 
 ##### `/image_processing/seperate_chars.py`
@@ -140,7 +144,7 @@ Where the input_path and output_path are paths to a file or a directory dependin
 This script uses OpenCVs contours and bounding boxes to create a new 64x64px image for every character in the image 
 supplied to it.
 
-Syntax: `python3 image_processing/seperate_chars <input_file_path> <output_directory>`
+Syntax: `python3 -m image_processing.seperate_chars <input_file_path> <output_directory>`
 
 The `<input_image_path>` and `output_directory` parameters can be omitted, in which case the default values 
 `test/multi_char/all-chars.jpeg` and `test/image_input` will be used respectively
@@ -164,7 +168,7 @@ called directly for training. All training data must be in the `/test.nosync/` d
 3 different directories: `ground_truth` containing the ground truth pen paths; `image_output` containing the undirected
 edge output from the image_processing scripts
 
-Syntax: `python3 neural_network/network.py`
+Syntax: `python3 -m neural_network.network`
 
 #### `/neural_network/uji_encoder.py`
 

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 # MODEL_PATH = "models/model_300_neurons_0.00001_lr_char-01-000-*-*.h5"
 from .image_data_utils import load_y, normalize_y, load_x, normalize_x, create_image_from_data
 
-MODEL_PATH = "models/bi-lstm-s2s-all_data_w_rotation-epoch_13100q.h5"
+MODEL_PATH = "models/BiLSTM-S2S.h5"
 # MODEL_PATH = "models/auto_save.h5"
 TEST_SPLIT = 0.1
 
