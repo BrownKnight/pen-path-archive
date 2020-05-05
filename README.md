@@ -8,8 +8,10 @@ The result of this is a system that can take an image of a set of or a single ch
 points representing the path the pen likely took to draw the character,
 
 ## Setup
-This is built against Python 3.7. It is recommended to use a venv when running this script for ease of use.
-The following packages are dependencies for this project:
+This system built with Python 3.7, and has only been tested with Python 3.7. Newer versions should work but have not 
+been tested. It is recommended to use a venv when running this script for ease of use.
+
+The following packages are dependencies for this project (non-exhaustive):
 - NumPy
 - MatPlotLib
 - SciKit-Image
