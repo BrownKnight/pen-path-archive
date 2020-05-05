@@ -22,7 +22,7 @@ import image_data_utils
 
 
 def process_image_input(image_path):
-    file_paths = sorted(glob.glob(image_path + "/*"))
+    file_paths = sorted([path for path in glob.glob(image_path + "/*") if not path.startswith(".")])
     images: np.ndarray = image_data_utils.load_rgb_images(file_paths)
     # We use different grid sizes for different numbers of images
     if images.shape[0] <= 36:
@@ -41,7 +41,7 @@ def process_image_input(image_path):
 
 
 def process_greyscale_image(image_path):
-    file_paths = sorted(glob.glob(image_path + "/*"))
+    file_paths = sorted([path for path in glob.glob(image_path + "/*") if not path.startswith(".")])
     images: np.ndarray = image_data_utils.load_greyscale_images(file_paths)
 
     if images.shape[0] <= 36:
